@@ -2,6 +2,7 @@
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
   "files.exclude": {
+    "**/.gradle": true,
     "**/.git": true,
     "**/.svn": true,
     "**/.hg": true,
@@ -56,5 +57,20 @@
     "edu.wpi.first.math.proto.*",
     "edu.wpi.first.math.**.proto.*",
     "edu.wpi.first.math.**.struct.*",
+  ],
+
+  "cSpell.words": [
+    "AHRS",
+    "Brushless",
+    "Deadband",
+    "Feedforward",
+    "feedforwards",
+    "Holonomic",
+    "intaking",
+    "Odometry",
+    "Roborio",
+    "setpoint",
+    "setpoints",
+    "URCL"
   ]
 }

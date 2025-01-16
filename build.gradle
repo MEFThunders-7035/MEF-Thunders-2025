@@ -1,11 +1,42 @@
 plugins {
     id "java"
+    id "jacoco"
     id "edu.wpi.first.GradleRIO" version "2025.1.1"
+    id "com.diffplug.spotless" version "6.23.3"
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+
+spotless {
+    java {
+        target fileTree('.') {
+            include '**/*.java'
+            exclude '**/build/**', '**/build-*/**', '**/logs/**'
+        }
+        toggleOffOn()
+        googleJavaFormat('1.19.1')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+
+        licenseHeader ''
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+    reportsDirectory = layout.projectDirectory.dir("logs/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.projectDirectory.dir("logs/jacocoHtml")
+    }
 }
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
