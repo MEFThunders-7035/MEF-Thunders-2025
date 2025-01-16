@@ -3,10 +3,7 @@ package frc.robot.simulationSystems;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.robot.Constants.ModuleConstants;
 
 public class SwerveModuleSim {
   /** Main timer to simulate the passage of time. */
@@ -28,9 +25,6 @@ public class SwerveModuleSim {
 
   /** Current simulated swerve module state. */
   private SwerveModuleState state;
-
-  private DCMotorSim driveMotorSim =
-      new DCMotorSim(DCMotor.getNEO(1), ModuleConstants.kDrivingMotorReduction, 0.025);
 
   public SwerveModuleSim() {
     timer = new Timer();

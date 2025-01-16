@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.CameraConstants.PiCamera;
 import java.util.ArrayList;
@@ -30,11 +31,11 @@ public final class PhotonCameraSystem {
 
   private static PhotonPoseEstimator getPhotonPoseEstimator() {
     // Attempt to load the AprilTagFieldLayout that will tell us where the tags are on the field.
-    fieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+    fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
     // Create pose estimator
     photonPoseEstimator =
         new PhotonPoseEstimator(
-            fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, PiCamera.robotToCam);
+            fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, PiCamera.robotToCam);
     photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
     System.out.println("Loaded PhotonPoseEstimator");
     return photonPoseEstimator;
@@ -69,10 +70,15 @@ public final class PhotonCameraSystem {
             PiCamera.kCameraHeight, targetHeightMeters, pitch, PiCamera.kCameraPitchRadians));
   }
 
+  private static Alert driverModeAlert =
+      new Alert("Driver Mode Was ON! Turning it off...", Alert.AlertType.kWarning);
+
   public static PhotonPipelineResult getLatestResult() {
     if (camera.getDriverMode()) {
-      System.out.println("Driver Mode Was ON! Turning it off...");
+      driverModeAlert.set(true);
       camera.setDriverMode(false);
+    } else {
+      driverModeAlert.set(false);
     }
     return camera.getLatestResult();
   }
@@ -196,7 +202,7 @@ public final class PhotonCameraSystem {
       return Optional.empty();
     }
     photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-    return photonPoseEstimator.update();
+    return photonPoseEstimator.update(getLatestResult());
   }
 
   /**
@@ -222,6 +228,6 @@ public final class PhotonCameraSystem {
       camera.setDriverMode(false);
       System.out.println("Camera Was in driver mode, switched to off...");
     }
-    return photonPoseEstimator.update();
+    return photonPoseEstimator.update(getLatestResult());
   }
 }

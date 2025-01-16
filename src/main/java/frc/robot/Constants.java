@@ -1,13 +1,17 @@
 package frc.robot;
 
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.pathplanner.lib.config.RobotConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.I2C;
+import java.util.Optional;
 
 public final class Constants {
   private Constants() {} // Prevents instantiation, as this is a utility class
@@ -216,7 +220,21 @@ public final class Constants {
     public static final int kLedCount = 82;
   }
 
+  // yes, it leaks memory, but it's a one-time thing, so it'sss fine...
+  @SuppressWarnings("resource")
+  private static final Optional<RobotConfig> getRobotConfig() {
+    try {
+      return Optional.of(RobotConfig.fromGUISettings());
+    } catch (Exception e) {
+      new Alert("Failed to get Robot Config", AlertType.kError).set(true);
+    }
+
+    return Optional.empty();
+  }
+
   public static final class AutoConstants {
+    public static final Optional<RobotConfig> kRobotConfig = getRobotConfig();
+
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
 

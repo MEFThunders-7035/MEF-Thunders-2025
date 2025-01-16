@@ -1,10 +1,10 @@
 package frc.robot.subsystems;
 
-import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.studica.frc.AHRS;
+import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.AutoConstants.DrivePIDController;
 import frc.robot.Constants.AutoConstants.RotationPIDController;
 import frc.robot.Constants.DriveConstants;
@@ -38,7 +39,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
-  private final AHRS navX = new AHRS();
+  private final AHRS navX = new AHRS(NavXComType.kMXP_SPI);
   private Field2d field = new Field2d();
 
   private Rotation2d fieldOrientationRotateBy = new Rotation2d();
@@ -99,25 +100,23 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   public DriveSubsystem() {
     // Do nothing
-    AutoBuilder.configureHolonomic(
+    AutoBuilder.configure(
         this::getPose, // Robot pose supplier
         this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting
         // pose)
         this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-        this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE
+        (speeds, feedforwards) ->
+            this.driveRobotRelative(
+                speeds), // Method that will drive the robot given ROBOT RELATIVE
         // ChassisSpeeds
-        new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in
+        new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in
             // your Constants class
             new PIDConstants(
                 DrivePIDController.kP, DrivePIDController.kD), // Translation PID constants
             new PIDConstants(
-                RotationPIDController.kP, RotationPIDController.kD), // Rotation PID constants
-            DriveConstants.kMaxSpeedMetersPerSecond, // Max module speed, in m/s
-            0.55, // Drive base radius in meters. Distance from robot center to furthest module.
-            new ReplanningConfig(
-                true, true) // Default path replanning config. See the API for the options
-            // here
-            ),
+                RotationPIDController.kP, RotationPIDController.kD)), // Rotation PID constants
+        // Max module speed, in m/s)
+        AutoConstants.kRobotConfig.get(),
         () -> {
           // Boolean supplier that controls when the path will be mirrored for the red
           // alliance
@@ -213,9 +212,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     SmartDashboard.putBoolean("AprilTag Seen", poseOpt.isPresent());
     if (poseOpt.isPresent() && poseOpt.get().targetsUsed.size() > 1) {
       // Do not use the rotation from the vision system in any situation as the data
-      // we receive is
-      // not reliable. navX rotation is A LOT MORE reliable so we will use that
-      // instead.
+      // we receive is not reliable.
+      // navX rotation is A LOT MORE reliable so we will use that instead.
       Pose2d receivedPose = poseOpt.get().estimatedPose.toPose2d();
       Pose2d poseToUse = new Pose2d(receivedPose.getTranslation(), getRotation2d());
       swerveOdometry.addVisionMeasurement(poseToUse, poseOpt.get().timestampSeconds);

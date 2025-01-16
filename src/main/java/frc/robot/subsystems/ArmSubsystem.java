@@ -1,11 +1,12 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkPIDController.ArbFFUnits;
-import com.revrobotics.SparkRelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,7 +24,7 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
   private final CANSparkMAXWrapped arm;
   private final CANSparkMAXWrapped armFollower;
   private final RelativeEncoder encoder;
-  private final SparkPIDController pidController;
+  private final SparkClosedLoopController pidController;
   private final ArmFeedforward feedforward;
 
   private static final double kArmParallelDifference = 0.00339;
@@ -40,14 +41,14 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
     arm = new CANSparkMAXWrapped(IntakeConstants.kArmMotorCanID, MotorType.kBrushed);
     armFollower =
         new CANSparkMAXWrapped(IntakeConstants.kArmFollowerMotorCanID, MotorType.kBrushed);
-    armFollower.follow(arm, true); // Inverted
-    arm.restoreFactoryDefaults();
-    encoder = arm.getEncoder(SparkRelativeEncoder.Type.kQuadrature, IntakeConstants.kArmEncoderCPR);
-    pidController = arm.getPIDController();
+
+    setupSparkMax();
+
+    encoder = arm.getEncoder();
+    pidController = arm.getClosedLoopController();
     feedforward = new ArmFeedforward(ArmPIDConstants.kS, ArmPIDConstants.kG, ArmPIDConstants.kV);
 
     SmartDashboard.putNumber("Arm Pos", 0);
-    setupSparkMax();
   }
 
   /**
@@ -56,21 +57,30 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
    * This method is here incase we want to switch to a different motor controller.
    */
   private void setupSparkMax() {
-    arm.setInverted(false);
-    encoder.setPositionConversionFactor(IntakeConstants.kArmEncoderPositionFactor);
-    pidController.setFeedbackDevice(encoder);
+    SparkMaxConfig armFollowerConfig = new SparkMaxConfig();
+    armFollowerConfig.follow(arm, true).smartCurrentLimit(IntakeConstants.kSmartCurrentLimit);
+    armFollower.configure(armFollowerConfig);
 
-    pidController.setP(IntakeConstants.ArmPIDConstants.kP);
-    pidController.setI(IntakeConstants.ArmPIDConstants.kI);
-    pidController.setD(IntakeConstants.ArmPIDConstants.kD);
-    pidController.setFF(IntakeConstants.ArmPIDConstants.kFF);
-    pidController.setIMaxAccum(0.1, 0);
-    pidController.setOutputRange(-0.2, 0.7); // I don't think we need these as Constants in a file.
+    SparkMaxConfig armConfig = new SparkMaxConfig();
+    armConfig
+        .encoder
+        .countsPerRevolution(IntakeConstants.kArmEncoderCPR)
+        .positionConversionFactor(IntakeConstants.kArmEncoderPositionFactor);
 
-    arm.setIdleMode(IntakeConstants.kArmMotorIdleMode);
-    arm.setSmartCurrentLimit(IntakeConstants.kSmartCurrentLimit);
+    armConfig
+        .closedLoop
+        .p(IntakeConstants.ArmPIDConstants.kP)
+        .i(IntakeConstants.ArmPIDConstants.kI)
+        .d(IntakeConstants.ArmPIDConstants.kD)
+        .iMaxAccum(0.1)
+        .outputRange(-0.2, 0.7); // I don't think we need these as Constants in a file.
 
-    arm.burnFlash();
+    armConfig
+        .inverted(false)
+        .idleMode(IntakeConstants.kArmMotorIdleMode)
+        .smartCurrentLimit(IntakeConstants.kSmartCurrentLimit);
+
+    arm.configure(armConfig);
   }
 
   @Override
@@ -210,6 +220,10 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
 
     double feedForwardCalculation = calculateFeedForward(position);
     pidController.setReference(
-        position, ControlType.kPosition, 0, feedForwardCalculation, ArbFFUnits.kVoltage);
+        position,
+        ControlType.kPosition,
+        ClosedLoopSlot.kSlot0,
+        feedForwardCalculation,
+        ArbFFUnits.kVoltage);
   }
 }

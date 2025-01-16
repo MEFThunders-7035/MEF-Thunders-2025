@@ -1,7 +1,8 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,7 +22,6 @@ public class IntakeSubsystem extends SubsystemBase implements AutoCloseable {
   private final CANSparkMAXWrapped armIntake;
   private final CANSparkMAXWrapped groundIntake;
   private final ColorSensorV3Wrapped colorSensor;
-  private boolean isForced = false;
 
   public IntakeSubsystem() {
     armIntake = new CANSparkMAXWrapped(IntakeConstants.kArmIntakeMotorCanID, MotorType.kBrushless);
@@ -43,19 +43,21 @@ public class IntakeSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   private void setupIntakeMotors() {
-    armIntake.restoreFactoryDefaults();
-    groundIntake.restoreFactoryDefaults();
+    SparkMaxConfig armIntakeConfig = new SparkMaxConfig();
+    SparkMaxConfig groundIntakeConfig = new SparkMaxConfig();
 
-    armIntake.setSmartCurrentLimit(20); // NEO 550 stall current is 20A
-    groundIntake.setSmartCurrentLimit(20); // NEO 550 stall current is 20A
-    armIntake.setInverted(true);
-    groundIntake.setInverted(true);
+    armIntakeConfig
+        .smartCurrentLimit(20) // NEO 550 stall current is 20A
+        .inverted(true)
+        .idleMode(IntakeConstants.kIntakeMotorIdleMode);
 
-    armIntake.setIdleMode(IntakeConstants.kIntakeMotorIdleMode);
-    groundIntake.setIdleMode(IdleMode.kCoast);
+    groundIntakeConfig
+        .smartCurrentLimit(20) // NEO 550 stall current is 20A
+        .inverted(true)
+        .idleMode(IdleMode.kCoast);
 
-    armIntake.burnFlash();
-    groundIntake.burnFlash();
+    armIntake.configure(armIntakeConfig);
+    groundIntake.configure(groundIntakeConfig);
   }
 
   @Override
@@ -149,7 +151,6 @@ public class IntakeSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   private void setIntakeSpeed(double armSpeed, double groundSpeed, boolean force) {
-    isForced = force;
     if (armSpeed > 0 && hasNote() && !force) { // If we are intaking, check if we have a note.
       armIntake.set(0);
     } else {

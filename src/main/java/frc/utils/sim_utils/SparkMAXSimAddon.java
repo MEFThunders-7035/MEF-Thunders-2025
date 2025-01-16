@@ -1,11 +1,11 @@
 package frc.utils.sim_utils;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.spark.SparkMax;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SparkMAXSimAddon {
-  private static Map<Integer, CANSparkMax> sparkMaxes = new HashMap<>();
+  private static Map<Integer, SparkMax> sparkMaxes = new HashMap<>(0);
 
   private static void throwIfSparkMAXExists(int deviceID) {
     if (sparkMaxes.containsKey(deviceID)) {
@@ -13,7 +13,7 @@ public class SparkMAXSimAddon {
     }
   }
 
-  private static void throwIfSparkMAXExists(CANSparkMax sparkMAX) {
+  private static void throwIfSparkMAXExists(SparkMax sparkMAX) {
     throwIfSparkMAXExists(sparkMAX.getDeviceId());
   }
 
@@ -23,21 +23,21 @@ public class SparkMAXSimAddon {
     }
   }
 
-  private static void throwIfSparkMAXDoesNotExist(CANSparkMax sparkMAX) {
+  private static void throwIfSparkMAXDoesNotExist(SparkMax sparkMAX) {
     throwIfSparkMAXDoesNotExist(sparkMAX.getDeviceId());
   }
 
-  public static void addSparkMAX(CANSparkMax sparkMAX) {
+  public static void addSparkMAX(SparkMax sparkMAX) {
     throwIfSparkMAXExists(sparkMAX);
     sparkMaxes.put(sparkMAX.getDeviceId(), sparkMAX);
   }
 
-  public static void removeSparkMAX(CANSparkMax sparkMAX) {
+  public static void removeSparkMAX(SparkMax sparkMAX) {
     throwIfSparkMAXDoesNotExist(sparkMAX);
     sparkMaxes.remove(sparkMAX.getDeviceId());
   }
 
-  public static CANSparkMax getSparkMAX(int deviceID) {
+  public static SparkMax getSparkMAX(int deviceID) {
     throwIfSparkMAXDoesNotExist(deviceID);
     return sparkMaxes.get(deviceID);
   }
@@ -48,7 +48,7 @@ public class SparkMAXSimAddon {
 
   /** Closes all SparkMAXes and clears the data. */
   public static void resetData() {
-    for (CANSparkMax sparkMAX : sparkMaxes.values()) {
+    for (SparkMax sparkMAX : sparkMaxes.values()) {
       sparkMAX.close();
     }
     sparkMaxes.clear();
