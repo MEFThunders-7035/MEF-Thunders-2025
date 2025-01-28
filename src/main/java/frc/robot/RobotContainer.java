@@ -12,22 +12,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.IntakeConstants;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IntakeWithLEDCommand;
-import frc.robot.commands.ShootToAmpCommand;
-import frc.robot.commands.ShootToSpeakerCommand;
-import frc.robot.commands.SmartIntakeCommand;
-import frc.robot.commands.led_commands.LEDIdleCommand;
 import frc.robot.simulationSystems.PhotonSim;
-import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.ArmSubsystem.ArmState;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LEDSystem;
 import frc.robot.subsystems.PhotonCameraSystem;
-import frc.robot.subsystems.ShooterSubsystem;
 import java.util.Map;
 import org.littletonrobotics.urcl.URCL;
 
@@ -38,9 +28,6 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
-  private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-  private final ArmSubsystem armSubsystem = new ArmSubsystem();
-  private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
   private final LEDSubsystem ledSubsystem = LEDSystem.getInstance();
 
   public RobotContainer() {
@@ -49,9 +36,6 @@ public class RobotContainer {
     configureJoystickBindings();
     setDefaultCommands();
     autoChooser = AutoBuilder.buildAutoChooser();
-    autoChooser.addOption(
-        "Shoot To Shooter",
-        new ShootToSpeakerCommand(shooterSubsystem, intakeSubsystem, armSubsystem, driveSubsystem));
     PhotonCameraSystem.getAprilTagWithID(0); // Load the class before enable.
     SmartDashboard.putData("Auto Chooser", autoChooser);
     if (RobotBase.isSimulation()) {
@@ -98,68 +82,21 @@ public class RobotContainer {
   }
 
   private void setupNamedCommands() {
-    NamedCommands.registerCommand("Intake", new IntakeWithLEDCommand(intakeSubsystem));
-    NamedCommands.registerCommand(
-        "Shoot To Speaker",
-        new ShootToSpeakerCommand(shooterSubsystem, intakeSubsystem, armSubsystem, driveSubsystem));
-    NamedCommands.registerCommand(
-        "Shoot To Amp", new ShootToAmpCommand(shooterSubsystem, intakeSubsystem, armSubsystem));
+    NamedCommands.registerCommand("SetX", driveSubsystem.setX());
   }
 
   private void setDefaultCommands() {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
-
-    // move arm with midi's potentiometer
-    armSubsystem.setDefaultCommand(armSubsystem.set(ArmState.IDLE));
-
-    intakeSubsystem.setDefaultCommand(intakeSubsystem.stop());
-
-    shooterSubsystem.setDefaultCommand(shooterSubsystem.stop());
-
-    ledSubsystem.setDefaultCommand(
-        new LEDIdleCommand(ledSubsystem, intakeSubsystem).ignoringDisable(true));
   }
 
   private void configureJoystickBindings() {
     commandController.a().whileTrue(driveSubsystem.setX());
 
-    commandController.b().whileTrue(new SmartIntakeCommand(intakeSubsystem, controller));
-
-    commandController
-        .y()
-        .whileTrue(
-            new ShootToSpeakerCommand(
-                shooterSubsystem, intakeSubsystem, armSubsystem, driveSubsystem, controller));
-
-    commandController
-        .x()
-        .whileTrue(new ShootToAmpCommand(shooterSubsystem, intakeSubsystem, armSubsystem));
-
     // .start is the `start` button on the controller not a `start` function.
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
-
-    // This command is here incase the intake gets stuck.
-    commandController.back().whileTrue(intakeSubsystem.run(-IntakeConstants.kIntakeSpeed));
-
-    commandController.rightBumper().whileTrue(shooterSubsystem.run(-1));
-
-    // lower level shoot command incase the other one has some issues it will not
-    // rotate the robot
-    // to face the shooter. which can sometimes break, currently investigating.
-    commandController
-        .leftBumper()
-        .whileTrue(
-            new ShootToSpeakerCommand(
-                shooterSubsystem, intakeSubsystem, armSubsystem, driveSubsystem));
-
-    commandController.pov(0).whileTrue(armSubsystem.setArmToAmp());
-    commandController.pov(180).whileTrue(armSubsystem.setArmToBottom());
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser
-        .getSelected()
-        .andThen(driveSubsystem.stop())
-        .beforeStarting(armSubsystem.runOnce(armSubsystem::resetEncoder));
+    return autoChooser.getSelected().andThen(driveSubsystem.stop());
   }
 }
