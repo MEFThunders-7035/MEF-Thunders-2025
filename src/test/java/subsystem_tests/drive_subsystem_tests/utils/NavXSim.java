@@ -1,20 +1,19 @@
 package subsystem_tests.drive_subsystem_tests.utils;
 
-import edu.wpi.first.hal.SimBoolean;
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
+import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 
 public class NavXSim {
+  // Taken and Modified from:
+  // https://github.com/Studica-Robotics/NavX
   public static void setAngle(double yaw) {
-    int device = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
-    SimDouble angle = new SimDouble(SimDeviceDataJNI.getSimValueHandle(device, "Yaw"));
+    var device = new SimDeviceSim("navX-Sensor", 4);
+    var angle = device.getDouble("Yaw");
     angle.set(yaw);
   }
 
   public static void setConnected(boolean connected) {
-    int device = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
-    SimBoolean isConnected =
-        new SimBoolean(SimDeviceDataJNI.getSimValueHandle(device, "Connected"));
+    var device = new SimDeviceSim("navX-Sensor", 4);
+    var isConnected = device.getBoolean("Connected");
     isConnected.set(connected);
   }
 }

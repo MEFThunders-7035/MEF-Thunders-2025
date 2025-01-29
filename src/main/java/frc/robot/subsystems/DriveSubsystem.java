@@ -5,7 +5,6 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
-import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -181,30 +180,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     field.close();
     publisher.close();
 
-    // closing navX with Reflection shenanigans
-    closeNavX();
-  }
-
-  /**
-   * Closes the navX with Reflection shenanigans. I couldn't find a way to close the navX without
-   * reflection, so I had to use reflection to access the private field and close it.
-   *
-   * <p>WARNING: This method is not guaranteed to work on all platforms, and may not work on macOS.
-   * This method is only used for testing and simulation purposes, and should not be used in a
-   * competition robot.
-   *
-   * <p>This method is not required when simulating in windows, but is required for linux. macOS is
-   * untested.
-   */
-  private void closeNavX() {
-    try {
-      var sd = AHRS.class.getDeclaredField("m_simDevice");
-      sd.setAccessible(true); // NOSONAR
-      var amazing = (SimDevice) sd.get(navX);
-      amazing.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    } // .get can throw TOO MANY exceptions
+    navX.close();
   }
 
   private void updatePoseWithVision() {
@@ -562,5 +538,18 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   private Rotation2d getFieldOrientedRotation2d() {
     return getRotation2d().rotateBy(fieldOrientationRotateBy);
+  }
+
+  // ONLY FOR SIMULATION
+
+  /**
+   * Set the simulated gyro angle.
+   *
+   * <p>THIS IS FOR SIMULATION ONLY WILL NOT WORK OTHERWISE. DO NOT USE IN A REAL ROBOT.
+   *
+   * @param angle the angle in degrees
+   */
+  public void setSimulatedGyroAngle(double angle) {
+    gyroSim.setAngle(angle);
   }
 }

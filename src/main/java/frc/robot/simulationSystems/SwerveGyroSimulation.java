@@ -4,10 +4,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.DriveConstants.SwerveModuleConstants;
 
 public class SwerveGyroSimulation {
+  private Alert alert =
+      new Alert(
+          "Setting the angle of the gyro in a real robot is not allowed. This is a simulation only feature.",
+          AlertType.kWarning);
 
   /** Main timer to control movement estimations. */
   private final Timer timer;
@@ -41,6 +48,9 @@ public class SwerveGyroSimulation {
    * @param states {@link SwerveModuleState} array of the module states.
    */
   public void updateOdometry(SwerveModuleState[] states) {
+    if (RobotBase.isReal()) {
+      return;
+    }
 
     angle +=
         SwerveModuleConstants.kDriveKinematics.toChassisSpeeds(states).omegaRadiansPerSecond
@@ -55,9 +65,14 @@ public class SwerveGyroSimulation {
   /**
    * Set the heading of the robot.
    *
-   * @param angle Angle of the robot in radians.
+   * @param angle Angle of the robot in degrees.
    */
   public void setAngle(double angle) {
-    this.angle = angle;
+    if (RobotBase.isReal()) {
+      alert.set(true);
+      return;
+    }
+
+    this.angle = Math.toRadians(angle);
   }
 }
