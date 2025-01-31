@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
-import frc.robot.commands.led_commands.LEDLoadingWaitCommand;
 import frc.robot.subsystems.LEDSubsystem;
 
 public class LEDTestUtils {
@@ -37,12 +36,12 @@ public class LEDTestUtils {
     Timer.delay(0.1); // let led loop do its thing
     checkForColorInAll(
         ledSubsystem,
-        LEDLoadingWaitCommand.DEFAULT_COLOR,
+        LEDSubsystem.DEFAULT_COLOR,
         untilIndex,
         "Color should be default color until %s".formatted(untilIndex));
   }
 
   public static Color getColorAtIndex(LEDSubsystem ledSubsystem, int index) {
-    return ledSubsystem.getStrip().getBuffer().getLED(index);
+    return ledSubsystem.getColorAtIndex(index);
   }
 }

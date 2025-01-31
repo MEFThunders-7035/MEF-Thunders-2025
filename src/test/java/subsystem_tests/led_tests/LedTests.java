@@ -1,36 +1,39 @@
 package subsystem_tests.led_tests;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static subsystem_tests.led_tests.utils.LEDTestUtils.checkForColorInAll;
 import static subsystem_tests.led_tests.utils.LEDTestUtils.getColorAtIndex;
 
-import edu.wpi.first.hal.HAL;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.SimHooks;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.LEDSystem;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import subsystem_tests.SubsystemTestBase;
 
-class LedTests {
+class LedTests extends SubsystemTestBase {
   private LEDSubsystem ledSubsystem;
 
   @BeforeEach
+  @Override
   public void setUp() {
-    HAL.initialize(500, 0);
-    ledSubsystem = LEDSystem.getInstance();
+    super.setUp();
+    ledSubsystem = new LEDSubsystem();
   }
 
   @AfterEach
+  @Override
   public void tearDown() {
-    // ledSubsystem is closed by `LEDSystem.resetLEDSubsystem()`
-    LEDSystem.resetLEDSubsystem();
+    super.tearDown();
+    ledSubsystem.close();
   }
 
   private void testUntilPercentage(double percentage) {
-    ledSubsystem.fillPercentageWithColor(percentage, Color.kWhite);
-    Timer.delay(0.1); // wait until command gets executed
+    runCommand(ledSubsystem.runPattern(LEDPattern.progressMaskLayer(() -> percentage)));
     for (int i = 0; i < ledSubsystem.getLedCount(); i++) {
       if (i < (int) (ledSubsystem.getLedCount() * percentage)) {
         assertEquals(
@@ -48,9 +51,9 @@ class LedTests {
 
   @Test
   void testFill() {
-    ledSubsystem.fill(Color.kWhite);
+    runCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kWhite)));
     Timer.delay(0.05); // let the loop change all the colors
-    for (int i = 0; i < ledSubsystem.getStrip().getLedCount(); i++) {
+    for (int i = 0; i < ledSubsystem.getLedCount(); i++) {
       assertEquals(
           Color.kWhite,
           getColorAtIndex(ledSubsystem, i),
@@ -60,28 +63,41 @@ class LedTests {
 
   @Test
   void testBlink() {
-    ledSubsystem.blink(Color.kWhite, 0.5);
-    Timer.delay(0.1);
+    SimHooks.pauseTiming();
+    SimHooks.stepTiming(Timer.getFPGATimestamp() % 1);
+    runCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kWhite).blink(Seconds.of(0.5))));
     checkForColorInAll(
         ledSubsystem, Color.kWhite, "Starting color should have been the the color specified");
-    Timer.delay(0.5); // wait for led's to close back down
+    SimHooks.stepTiming(0.5);
+    commandScheduler.run(); // wait for led's to close back down
     checkForColorInAll(
         ledSubsystem, Color.kBlack, "Color should have turned to black in blinking sequence");
-    Timer.delay(0.5);
+    SimHooks.stepTiming(0.5);
+    commandScheduler.run();
     checkForColorInAll(
         ledSubsystem, Color.kWhite, "Color should have turned back to the color specified");
+    SimHooks.resumeTiming();
   }
 
   @Test
   void testBlinkRed() {
-    ledSubsystem.blinkRed();
-    Timer.delay(0.1);
+    // We have to do this, because the blink command depends on the RobotController.geTimeStamp()
+    // So to make it deterministic we have to pause the time and step it manually
+    SimHooks.pauseTiming();
+    SimHooks.stepTiming(Timer.getFPGATimestamp() % 1); // make sure we are in sync with the blink
+
+    runCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kRed).blink(Seconds.of(0.5))));
     checkForColorInAll(ledSubsystem, Color.kRed, "Color should be red before blink");
-    Timer.delay(0.2);
+    SimHooks.stepTiming(0.5);
+    commandScheduler.run();
     checkForColorInAll(
         ledSubsystem, Color.kBlack, "Color should have turned to black in blinking sequence");
-    Timer.delay(0.2);
+    SimHooks.stepTiming(0.5);
+    commandScheduler.run();
     checkForColorInAll(ledSubsystem, Color.kRed, "Color should have turned back to red");
+
+    // Let the rest of the tests work normally, by resuming the time
+    SimHooks.resumeTiming();
   }
 
   @Test
@@ -116,18 +132,5 @@ class LedTests {
     setUp();
     testUntilPercentage(0.9);
     // Auto Teardown
-  }
-
-  @Test
-  void testStatusFills() {
-    ledSubsystem.setStatusColor(false);
-    Timer.delay(0.1);
-    checkForColorInAll(ledSubsystem, Color.kRed, "Color Should be red when status is false");
-    tearDown();
-
-    setUp();
-    ledSubsystem.setStatusColor(true);
-    Timer.delay(0.1);
-    checkForColorInAll(ledSubsystem, Color.kGreen, "Color should be green when status is true");
   }
 }
