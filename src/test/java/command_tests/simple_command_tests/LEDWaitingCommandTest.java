@@ -14,18 +14,23 @@ import org.junit.jupiter.api.Test;
 
 class LEDWaitingCommandTest extends CommandTestBase {
   private static final double kWaitTime = 2.0;
+  private LEDSubsystem ledSubsystem;
   private Command ledLoadingWaitCommand;
 
   @BeforeEach
+  @Override
   public void setUp() {
     super.setUp();
+    ledSubsystem = new LEDSubsystem();
     ledLoadingWaitCommand = ledSubsystem.loadingWaitCommand(kWaitTime, LEDSubsystem.DEFAULT_COLOR);
     commandScheduler.schedule(ledLoadingWaitCommand);
   }
 
   @AfterEach
+  @Override
   public void tearDown() {
     super.tearDown();
+    ledSubsystem.close();
   }
 
   void testLEDLoading(double waitTime) {
