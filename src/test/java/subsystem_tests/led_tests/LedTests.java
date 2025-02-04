@@ -64,7 +64,8 @@ class LedTests extends SubsystemTestBase {
   @Test
   void testBlink() {
     SimHooks.pauseTiming();
-    SimHooks.stepTiming(Timer.getFPGATimestamp() % 1);
+    SimHooks.restartTiming();
+    SimHooks.stepTiming(Timer.getFPGATimestamp() % 0.5);
     runCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kWhite).blink(Seconds.of(0.5))));
     checkForColorInAll(
         ledSubsystem, Color.kWhite, "Starting color should have been the the color specified");
@@ -81,10 +82,11 @@ class LedTests extends SubsystemTestBase {
 
   @Test
   void testBlinkRed() {
-    // We have to do this, because the blink command depends on the RobotController.geTimeStamp()
+    // We have to do this, because the blink command depends on the RobotController.getTime()
     // So to make it deterministic we have to pause the time and step it manually
     SimHooks.pauseTiming();
-    SimHooks.stepTiming(Timer.getFPGATimestamp() % 1); // make sure we are in sync with the blink
+    SimHooks.restartTiming();
+    SimHooks.stepTiming(Timer.getFPGATimestamp() % 0.5); // make sure we are in sync with the blink
 
     runCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kRed).blink(Seconds.of(0.5))));
     checkForColorInAll(ledSubsystem, Color.kRed, "Color should be red before blink");
