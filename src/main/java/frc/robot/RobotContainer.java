@@ -5,6 +5,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -16,7 +17,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.simulationSystems.PhotonSim;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.LEDSystem;
 import frc.robot.subsystems.PhotonCameraSystem;
 import java.util.Map;
 import org.littletonrobotics.urcl.URCL;
@@ -28,7 +28,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
-  private final LEDSubsystem ledSubsystem = LEDSystem.getInstance();
+  private final LEDSubsystem ledSubsystem = new LEDSubsystem();
 
   public RobotContainer() {
     setupNamedCommands();
@@ -87,6 +87,7 @@ public class RobotContainer {
 
   private void setDefaultCommands() {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
+    ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.kOff));
   }
 
   private void configureJoystickBindings() {
