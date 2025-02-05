@@ -31,7 +31,7 @@ public final class PhotonCameraSystem {
 
   private static PhotonPoseEstimator getPhotonPoseEstimator() {
     // Attempt to load the AprilTagFieldLayout that will tell us where the tags are on the field.
-    fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
+    fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
     // Create pose estimator
     photonPoseEstimator =
         new PhotonPoseEstimator(
