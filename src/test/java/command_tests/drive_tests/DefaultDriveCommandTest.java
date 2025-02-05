@@ -26,6 +26,7 @@ class DefaultDriveCommandTest extends CommandTestBase {
   Command defaultDriveCommand;
 
   @BeforeEach
+  @Override
   public void setUp() {
     super.setUp();
     driveSubsystem = new DriveSubsystem();
@@ -36,6 +37,7 @@ class DefaultDriveCommandTest extends CommandTestBase {
   }
 
   @AfterEach
+  @Override
   public void tearDown() {
     super.tearDown();
     resetController();
