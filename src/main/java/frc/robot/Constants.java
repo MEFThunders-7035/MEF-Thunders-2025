@@ -10,7 +10,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.I2C;
 import java.util.Optional;
 
 public final class Constants {
@@ -132,72 +131,11 @@ public final class Constants {
     public static final double kDriveMaxOutput = 1.0;
   }
 
-  public static final class IntakeConstants {
-    public static final double kIntakeSpeed = 1;
-    public static final double kGroundIntakeRunSpeed = kIntakeSpeed; // used while intaking
-    public static final double kArmIntakeRunSpeed = kIntakeSpeed; // only while intaking
-    public static final double kPushToShooterSpeed =
-        kIntakeSpeed; // only while pushing to shooter, which uses arm only
-
-    public static final int kArmIntakeMotorCanID = 9;
-    public static final int kGroundIntakeMotorCanID = 13;
-    public static final int kArmMotorCanID = 10;
-    public static final int kArmFollowerMotorCanID = 11;
-
-    public static final IdleMode kArmMotorIdleMode = IdleMode.kBrake;
-    public static final IdleMode kIntakeMotorIdleMode = IdleMode.kBrake;
-
-    public static final class ColorSensorConstants {
-      public static final I2C.Port kColorSensorPort = I2C.Port.kMXP; // Connected to the NavX MXP
-    }
-
-    public static final int kArmEncoderCPR = 4096; // Trough Bore
-    public static final double kArmEncoderGearAmount = 1; // Directly Connected
-    public static final double kArmEncoderPositionFactor = 1 / (kArmEncoderGearAmount);
-    public static final int kSmartCurrentLimit = 40;
-
-    public static final class ArmPIDConstants {
-      public static final double kP = 3; // 3
-      public static final double kI = 0.02; // 0.02
-      public static final double kD = 8; // 4
-      public static final double kFF = 0.0; // 0
-
-      // Feedforward gains
-      // ! TODO: TUNE
-      public static final double kS = 0.0;
-      public static final double kG = 2;
-      public static final double kV = 0.0;
-
-      public static final double kAllowedError = 0.01;
-    }
-  }
-
-  public static final class ArmConstants {
-    public static final double AMP_POSITION = 0.5;
-
-    public static final class ArmPIDConstants {
-      public static final double kP = 3; // 3
-      public static final double kI = 0.02; // 0.02
-      public static final double kD = 8; // 4
-      public static final double kFF = 0.0; // 0
-
-      // Feedforward gains
-      // ! TODO: TUNE
-      public static final double kS = 0.0;
-      public static final double kG = 2;
-      public static final double kV = 0.0;
-
-      public static final double kAllowedError = 0.01;
-    }
-  }
-
-  public static final class ShooterConstants {
-    public static final int kShooterMotorPwmID = 0;
-
-    public static final int kShooter1CanID = 11;
-    public static final int kShooter2CanID = 12;
-
-    public static final double kShooterSpeed = 1;
+  public static final class CoralIntakeConstants {
+    public static final int kIntakeMotorCanID = 9;
+    public static final double kIntakeSpeed = 0.8;
+    public static final double kThrowSpeed = 0.6;
+    public static final double kIdleSpeed = 0.3; // The speed that lets the coral stay in place
   }
 
   public static final class CameraConstants {
