@@ -132,6 +132,11 @@ public final class Constants {
   }
 
   public static final class CoralIntakeConstants {
+    public static final int kUltrasonicPingChannel = 0;
+    public static final int kUltrasonicEchoChannel = 1;
+
+    public static final int kUltrasonicThreshold = 30; // 3cm -> mm
+
     public static final int kIntakeMotorCanID = 9;
     public static final double kIntakeSpeed = 0.8;
     public static final double kThrowSpeed = 0.6;
