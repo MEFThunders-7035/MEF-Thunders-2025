@@ -140,7 +140,7 @@ public final class Constants {
     public static final int kIntakeMotorCanID = 9;
     public static final double kIntakeSpeed = 0.8;
     public static final double kThrowSpeed = 0.6;
-    public static final double kIdleSpeed = 0.3; // The speed that lets the coral stay in place
+    public static final double kIdleSpeed = 0; // The speed that lets the coral stay in place
   }
 
   public static final class CameraConstants {
