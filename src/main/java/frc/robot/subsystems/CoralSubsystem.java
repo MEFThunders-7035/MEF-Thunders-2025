@@ -31,7 +31,7 @@ public class CoralSubsystem extends SubsystemBase implements AutoCloseable {
     var config = new SparkMaxConfig();
 
     config
-        .smartCurrentLimit(50) // NEO stall current is 50A
+        .smartCurrentLimit(20) // NEO 550 stall current is 20A
         .inverted(false)
         .idleMode(IdleMode.kBrake);
 
