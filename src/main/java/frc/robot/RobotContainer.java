@@ -6,8 +6,6 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -40,9 +38,6 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
     PhotonCameraSystem.getAprilTagWithID(0); // Load the class before enable.
     SmartDashboard.putData("Auto Chooser", autoChooser);
-    if (RobotBase.isSimulation()) {
-      simInit();
-    }
     setupCamera();
   }
 
@@ -56,30 +51,9 @@ public class RobotContainer {
     DriverStation.startDataLog(DataLogManager.getLog());
   }
 
-  private Thread simThread;
-
-  public void simInit() {
-    simThread =
-        new Thread(
-            () -> {
-              System.out.println("Starting PhotonSim");
-              while (true) {
-                PhotonSim.update(driveSubsystem.getPose());
-                // I do not want to use a busy loop, so I added a delay.
-                Timer.delay(0.05);
-              }
-            },
-            "simThread");
-    simThread.setDaemon(true);
-    simThread.start();
-  }
-
   public void simPeriodic() {
-    if (!simThread.isAlive()) {
-      simInit(); // If the thread dies, restart it.
-      // This is here because sometimes the thread throws an exception and dies.
-    }
     // add any simulation specific code here.
+    PhotonSim.update(driveSubsystem.getPose());
     // was made for photonSim, but it's not used.
   }
 
