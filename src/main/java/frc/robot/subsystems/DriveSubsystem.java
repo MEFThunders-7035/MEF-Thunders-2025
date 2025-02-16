@@ -160,14 +160,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
         new SwerveModuleState[] {
           frontLeft.getState(), frontRight.getState(), rearLeft.getState(), rearRight.getState(),
         });
-
-    field
-        .getObject("XModules")
-        .setPoses(
-            frontLeft.getRealWorldPose(getPose()),
-            frontRight.getRealWorldPose(getPose()),
-            rearLeft.getRealWorldPose(getPose()),
-            rearRight.getRealWorldPose(getPose()));
   }
 
   @Override
