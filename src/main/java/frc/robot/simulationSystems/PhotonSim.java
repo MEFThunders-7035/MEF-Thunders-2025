@@ -1,5 +1,6 @@
 package frc.robot.simulationSystems;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.Constants.CameraConstants.PiCamera;
@@ -15,7 +16,7 @@ public class PhotonSim {
     cameraSim = new PhotonCameraSim(PhotonCameraSystem.getCamera());
     visionSim = new VisionSystemSim(cameraSim.getCamera().getName());
     visionSim.addCamera(cameraSim, PiCamera.robotToCam);
-    visionSim.addAprilTags(AprilTagFields.k2024Crescendo.loadAprilTagLayoutField());
+    visionSim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark));
   }
 
   public static void update(Pose2d robotPose) {
