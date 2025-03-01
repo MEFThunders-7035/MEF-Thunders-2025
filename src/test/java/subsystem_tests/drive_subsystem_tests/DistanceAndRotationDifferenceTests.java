@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.subsystems.PhotonCameraSystem;
+import frc.robot.subsystems.Vision;
 import frc.utils.ExtraFunctions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,10 +28,7 @@ class DistanceAndRotationDifferenceTests extends DriveSubsystemTestBase {
   @Test
   void testRotationDifference() {
     // AprilTag positions
-    var tag =
-        PhotonCameraSystem.getFieldLayout()
-            .getTagPose(ExtraFunctions.getShooterAprilTagID())
-            .orElseThrow();
+    var tag = Vision.fieldLayout.getTagPose(ExtraFunctions.getShooterAprilTagID()).orElseThrow();
 
     driveSubsystem.resetOdometry(new Pose2d(tag.getX() + 2, tag.getY() + 2, new Rotation2d(0)));
 
@@ -42,10 +39,7 @@ class DistanceAndRotationDifferenceTests extends DriveSubsystemTestBase {
   @Test
   void testDistanceDifference() {
     // AprilTag positions
-    var tag =
-        PhotonCameraSystem.getFieldLayout()
-            .getTagPose(ExtraFunctions.getShooterAprilTagID())
-            .orElseThrow();
+    var tag = Vision.fieldLayout.getTagPose(ExtraFunctions.getShooterAprilTagID()).orElseThrow();
 
     driveSubsystem.resetOdometry(new Pose2d(tag.getX() + 2, tag.getY() + 2, new Rotation2d(0)));
 

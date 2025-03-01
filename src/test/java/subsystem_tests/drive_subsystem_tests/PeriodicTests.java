@@ -32,6 +32,7 @@ class PeriodicTests extends DriveSubsystemTestBase {
   void testPeriodic() {
     driveSubsystem.resetOdometry(new Pose2d(3, 2, Rotation2d.fromDegrees(30)));
 
+    driveSubsystem.simulationPeriodic(); // set vision to correct pose first
     driveSubsystem.periodic();
     Field2d field = (Field2d) SmartDashboard.getData("Field");
 

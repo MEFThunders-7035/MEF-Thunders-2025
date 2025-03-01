@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.simulationSystems.PhotonSim;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -69,9 +68,7 @@ public class Robot extends TimedRobot {
   public void testExit() {}
 
   @Override
-  public void simulationInit() {
-    PhotonSim.setupSim();
-  }
+  public void simulationInit() {}
 
   @Override
   public void simulationPeriodic() {
