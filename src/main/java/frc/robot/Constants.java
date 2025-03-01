@@ -1,12 +1,19 @@
 package frc.robot;
 
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -227,8 +234,28 @@ public final class Constants {
   }
 
   public static final class CameraConstants {
-    public static final class PiCamera {
+
+    public static final AprilTagFieldLayout kFieldLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+
+    public static interface Camera {
+      public abstract String getCameraName();
+
+      public abstract Transform3d getRobotToCam();
+
+      public abstract Matrix<N3, N1> getSingleTagStdDevs();
+
+      public abstract Matrix<N3, N1> getMultiTagStdDevs();
+    }
+
+    public static final class PiCamera implements Camera {
       public static final String cameraName = "piCamera";
+
+      @Override
+      public String getCameraName() {
+        return cameraName;
+      }
+
       public static final double kCameraHeight = 0.225;
       public static final double kCameraYDistanceMeters = -0.15; // 15 cm back of the robot
       public static final double kCameraXDistanceMeters = 0.18; // ~18 cm away sideways
@@ -238,6 +265,65 @@ public final class Constants {
           new Transform3d(
               new Translation3d(kCameraXDistanceMeters, kCameraYDistanceMeters, kCameraHeight),
               new Rotation3d(0, kCameraPitchRadians, kCameraYawRadians));
+
+      @Override
+      public Transform3d getRobotToCam() {
+        return robotToCam;
+      }
+
+      // The standard deviations of our vision estimated poses, which affect correction rate
+      // FALSE VALUES, TUNE THESE BEFORE ACTUAL USAGE IN COMP AND MATCHES TAKEN FROM:
+      // https://github.com/PhotonVision/photonvision/blob/main/photonlib-java-examples/poseest/src/main/java/frc/robot/Constants.java
+      // TODO: ACTUALLY MEASURE THESE
+      public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+      public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
+      @Override
+      public Matrix<N3, N1> getSingleTagStdDevs() {
+        return kSingleTagStdDevs;
+      }
+
+      @Override
+      public Matrix<N3, N1> getMultiTagStdDevs() {
+        return kMultiTagStdDevs;
+      }
+    }
+
+    public static final class TestCamera implements Camera {
+      public static final String cameraName = "testCamera";
+
+      @Override
+      public String getCameraName() {
+        return cameraName;
+      }
+
+      public static final double kCameraHeight = 0.5;
+      public static final double kCameraYDistanceMeters = 0;
+      public static final double kCameraXDistanceMeters = 0;
+      public static final double kCameraPitchRadians = Math.toRadians(-30); // 30 degrees up
+      public static final double kCameraYawRadians = 0;
+      public static final Transform3d robotToCam =
+          new Transform3d(
+              new Translation3d(kCameraXDistanceMeters, kCameraYDistanceMeters, kCameraHeight),
+              new Rotation3d(0, kCameraPitchRadians, kCameraYawRadians));
+
+      @Override
+      public Transform3d getRobotToCam() {
+        return robotToCam;
+      }
+
+      public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+      public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
+      @Override
+      public Matrix<N3, N1> getSingleTagStdDevs() {
+        return kSingleTagStdDevs;
+      }
+
+      @Override
+      public Matrix<N3, N1> getMultiTagStdDevs() {
+        return kMultiTagStdDevs;
+      }
     }
   }
 
@@ -274,6 +360,13 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
         new TrapezoidProfile.Constraints(
             kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+
+    public static final PathConstraints kPathConstraints =
+        new PathConstraints(
+            kMaxSpeedMetersPerSecond,
+            kMaxAccelerationMetersPerSecondSquared,
+            kMaxAngularSpeedRadiansPerSecond,
+            kMaxAngularSpeedRadiansPerSecondSquared);
 
     public static final class DrivePIDController {
       public static final double kP = 2.0;

@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AutoConstants;
@@ -97,8 +98,11 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
           .getStructArrayTopic("Swerve", SwerveModuleState.struct)
           .publish();
 
+  Vision visionSystem;
+
   public DriveSubsystem() {
-    // Do nothing
+    visionSystem = new Vision(this::getPose);
+
     AutoBuilder.configure(
         this::getPose, // Robot pose supplier
         this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting
@@ -131,10 +135,6 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
         this // Reference to this subsystem to set requirements
         );
     SmartDashboard.putNumber("Move By", 0);
-    if (RobotBase.isSimulation()) {
-      SmartDashboard.putNumber("X position", 0);
-      SmartDashboard.putNumber("Y position", 0);
-    }
   }
 
   @Override
@@ -148,8 +148,8 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
               rearLeft.getPosition(),
               rearRight.getPosition()
             });
-    field.setRobotPose(pose);
     updatePoseWithVision();
+    field.setRobotPose(pose);
     gyroSim.updateOdometry(getModuleDesiredStates());
     SmartDashboard.putData(field);
     SmartDashboard.putNumber("Rotation", getRotation2d().getDegrees());
@@ -160,6 +160,13 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
         new SwerveModuleState[] {
           frontLeft.getState(), frontRight.getState(), rearLeft.getState(), rearRight.getState(),
         });
+
+    CommandScheduler.getInstance().printWatchdogEpochs();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    visionSystem.simulationPeriodic();
   }
 
   @Override
@@ -171,22 +178,15 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     field.close();
     publisher.close();
+    visionSystem.close();
 
     navX.close();
   }
 
   private void updatePoseWithVision() {
-    var poseOpt = PhotonCameraSystem.getEstimatedGlobalPose(field.getRobotPose());
+    var poseOpt = visionSystem.getEstimatedGlobalPose();
     SmartDashboard.putBoolean("AprilTag Seen", poseOpt.isPresent());
-    if (poseOpt.isPresent() && poseOpt.get().targetsUsed.size() > 1) {
-      // Do not use the rotation from the vision system in any situation as the data
-      // we receive is not reliable.
-      // navX rotation is A LOT MORE reliable so we will use that instead.
-      Pose2d receivedPose = poseOpt.get().estimatedPose.toPose2d();
-      Pose2d poseToUse = new Pose2d(receivedPose.getTranslation(), getRotation2d());
-      swerveOdometry.addVisionMeasurement(poseToUse, poseOpt.get().timestampSeconds);
-    }
-
+    // only allow multitag values
     SmartDashboard.putNumber("Distance To Shooter", getDistanceToShooter());
 
     SmartDashboard.putNumber(
@@ -194,11 +194,22 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
     SmartDashboard.putNumber(
         "Arm Angle Required", ExtraFunctions.getAngleFromDistance(getDistanceToShooter()));
+
+    if (poseOpt.isEmpty()) return;
+
+    var pose = poseOpt.get();
+    if (pose.targetsUsed.size() < 2) return; // is multiTag
+
+    // Do not use the rotation from the vision system in any situation as the data
+    // we receive is not reliable.
+    // navX rotation is A LOT MORE reliable so we will use that instead.
+    Pose2d receivedPose = pose.estimatedPose.toPose2d();
+    Pose2d poseToUse = new Pose2d(receivedPose.getTranslation(), getRotation2d());
+    swerveOdometry.addVisionMeasurement(poseToUse, pose.timestampSeconds);
   }
 
   private Optional<Pose3d> getTagPose(int id) {
-    var tagField = PhotonCameraSystem.getFieldLayout();
-    var tag = tagField.getTagPose(id);
+    var tag = Vision.fieldLayout.getTagPose(id);
 
     if (tag.isEmpty()) {
       DriverStation.reportError("Field Layout Couldn't be loaded", false);
@@ -297,6 +308,10 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   /** Sets the wheels into an X formation to prevent movement. */
   public Command setX() {
     return this.runOnce(this::setModulesToXFormation);
+  }
+
+  public Command goToPose(Pose2d pose) {
+    return AutoBuilder.pathfindToPose(pose, AutoConstants.kPathConstraints);
   }
 
   /**
