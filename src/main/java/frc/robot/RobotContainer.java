@@ -66,6 +66,8 @@ public class RobotContainer {
   private void setDefaultCommands() {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
     ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.kOff));
+    elevatorSubsystem.setDefaultCommand(
+        elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.IDLE));
   }
 
   private void configureJoystickBindings() {
