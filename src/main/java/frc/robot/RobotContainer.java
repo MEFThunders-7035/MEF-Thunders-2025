@@ -15,6 +15,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.simulationSystems.PhotonSim;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.PhotonCameraSystem;
 import java.util.Map;
@@ -28,6 +29,7 @@ public class RobotContainer {
 
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final CoralSubsystem coralSubsystem = new CoralSubsystem();
+  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
 
   public RobotContainer() {
@@ -72,6 +74,9 @@ public class RobotContainer {
     commandController.rightBumper().whileTrue(coralSubsystem.takeCoral());
 
     commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
+
+    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
+    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
 
     // .start is the `start` button on the controller not a `start` function.
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
