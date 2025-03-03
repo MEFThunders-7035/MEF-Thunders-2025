@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -11,16 +10,15 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.CameraConstants.Camera;
-import frc.robot.Constants.CameraConstants.PiCamera;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class PhotonPoseCamera implements AutoCloseable {
@@ -28,14 +26,13 @@ public class PhotonPoseCamera implements AutoCloseable {
   private final PhotonPoseEstimator photonEstimator;
   private Matrix<N3, N1> curStdDevs;
 
-  private Supplier<Pose2d> poseSupplier;
-
   private Camera cameraConstants;
   // Simulation
   private PhotonCameraSim cameraSim;
-  private Field2d debugField;
 
-  public PhotonPoseCamera(Supplier<Pose2d> actualRobotPose, Camera cameraConstantsToUse) {
+  private Field2d debugField = new Field2d();
+
+  public PhotonPoseCamera(Camera cameraConstantsToUse) {
     cameraConstants = cameraConstantsToUse;
     camera = new PhotonCamera(cameraConstants.getCameraName());
 
@@ -43,18 +40,16 @@ public class PhotonPoseCamera implements AutoCloseable {
         new PhotonPoseEstimator(
             CameraConstants.kFieldLayout,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            PiCamera.robotToCam);
+            cameraConstants.getRobotToCam());
     photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
-
-    poseSupplier = actualRobotPose;
 
     // ----- Simulation
     if (RobotBase.isSimulation()) {
       // Create simulated camera properties. These can be set to mimic your actual camera.
       var cameraProp = new SimCameraProperties();
       cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));
-      cameraProp.setCalibError(0.35, 0.10);
-      cameraProp.setFPS(15);
+      cameraProp.setCalibError(0.25, 0.10);
+      cameraProp.setFPS(20);
       cameraProp.setAvgLatencyMs(50);
       cameraProp.setLatencyStdDevMs(15);
       // Create a PhotonCameraSim which will update the linked PhotonCamera's values with visible
@@ -64,10 +59,25 @@ public class PhotonPoseCamera implements AutoCloseable {
     }
   }
 
+  @Override
+  public void close() {
+    camera.close();
+    cameraSim.close();
+    debugField.close();
+  }
+
   private void putFieldToDashboard() {
     if (RobotBase.isSimulation()) {
-      SmartDashboard.putData(, debugField);
+      SmartDashboard.putData(cameraConstants.getCameraName() + "-Debug", debugField);
     }
+  }
+
+  public void simulationPeriodic() {
+    putFieldToDashboard();
+  }
+
+  public String getName() {
+    return cameraConstants.getCameraName();
   }
 
   /**
@@ -88,13 +98,8 @@ public class PhotonPoseCamera implements AutoCloseable {
 
       if (RobotBase.isSimulation()) {
         visionEst.ifPresentOrElse(
-            est ->
-                getSimDebugField()
-                    .getObject("VisionEstimation")
-                    .setPose(est.estimatedPose.toPose2d()),
-            () -> {
-              getSimDebugField().getObject("VisionEstimation").setPoses();
-            });
+            est -> debugField.getObject("VisionEstimation").setPose(est.estimatedPose.toPose2d()),
+            () -> debugField.getObject("VisionEstimation").setPoses());
       }
     }
     return visionEst;
@@ -111,11 +116,11 @@ public class PhotonPoseCamera implements AutoCloseable {
       Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
     if (estimatedPose.isEmpty()) {
       // No pose input. Default to single-tag std devs
-      curStdDevs = PiCamera.kSingleTagStdDevs;
+      curStdDevs = cameraConstants.getSingleTagStdDevs();
 
     } else {
       // Pose present. Start running Heuristic
-      var estStdDevs = PiCamera.kSingleTagStdDevs;
+      var estStdDevs = cameraConstants.getSingleTagStdDevs();
       int numTags = 0;
       double avgDist = 0;
 
@@ -134,12 +139,12 @@ public class PhotonPoseCamera implements AutoCloseable {
 
       if (numTags == 0) {
         // No tags visible. Default to single-tag std devs
-        curStdDevs = PiCamera.kSingleTagStdDevs;
+        curStdDevs = cameraConstants.getSingleTagStdDevs();
       } else {
         // One or more tags visible, run the full heuristic.
         avgDist /= numTags;
         // Decrease std devs if multiple targets are visible
-        if (numTags > 1) estStdDevs = PiCamera.kMultiTagStdDevs;
+        if (numTags > 1) estStdDevs = cameraConstants.getMultiTagStdDevs();
         // Increase std devs based on (average) distance
         if (numTags == 1 && avgDist > 4)
           estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
@@ -157,5 +162,11 @@ public class PhotonPoseCamera implements AutoCloseable {
    */
   public Matrix<N3, N1> getEstimationStdDevs() {
     return curStdDevs;
+  }
+
+  /* SIMULATION */
+
+  public void addCameraToSimField(VisionSystemSim visionSim) {
+    visionSim.addCamera(cameraSim, cameraConstants.getRobotToCam());
   }
 }

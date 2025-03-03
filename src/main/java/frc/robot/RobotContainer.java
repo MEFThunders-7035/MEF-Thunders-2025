@@ -74,7 +74,9 @@ public class RobotContainer {
     commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
 
     commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
-    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
+    commandController.x().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
+
+    commandController.b().whileTrue(driveSubsystem.goToNearestReef());
 
     // .start is the `start` button on the controller not a `start` function.
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
