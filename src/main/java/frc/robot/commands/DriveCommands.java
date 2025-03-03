@@ -59,23 +59,6 @@ public class DriveCommands {
         () -> true);
   }
 
-  public static Command driveFacingShooter(
-      DriveSubsystem driveSubsystem, XboxController controller) {
-    var rotController = getPIDController();
-    return driveSubsystem.drive(
-        () ->
-            addBoost(
-                -controller.getLeftY(),
-                getBoostByValue(
-                    controller)), // this is inverted because logitech controller is inverted
-        () ->
-            addBoost(
-                -controller.getLeftX(),
-                getBoostByValue(controller)), // ! THIS IS INVERTED BECAUSE +y IS LEFT of
-        () ->
-            rotController.calculate(driveSubsystem.getRotationDifferenceToShooter().getRadians()));
-  }
-
   private static double addBoost(double value, double boost) {
     /*
      * we wish to add the DriveSensitivity amount of the value as boost

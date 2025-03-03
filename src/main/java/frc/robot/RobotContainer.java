@@ -93,6 +93,8 @@ public class RobotContainer {
 
     commandController.a().whileTrue(algaearmSubsystem.setArmDirection(true));
 
+    commandController.b().whileTrue(driveSubsystem.goToNearestReef());
+
     // .start is the `start` button on the controller not a `start` function.
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
   }

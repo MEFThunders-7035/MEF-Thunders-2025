@@ -8,7 +8,6 @@ import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,6 +17,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,13 +28,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.AutoConstants.DrivePIDController;
 import frc.robot.Constants.AutoConstants.RotationPIDController;
+import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.DriveConstants.MotorConstants;
 import frc.robot.Constants.DriveConstants.SwerveModuleConstants;
+import frc.robot.FieldConstants;
 import frc.robot.simulationSystems.SwerveGyroSimulation;
-import frc.utils.ExtraFunctions;
 import frc.utils.SwerveUtils;
-import java.util.Optional;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -101,7 +102,10 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   Vision visionSystem;
 
   public DriveSubsystem() {
-    visionSystem = new Vision(this::getPose);
+    visionSystem =
+        Vision.fromCameraConstants(
+            this::getPose,
+            List.of(new CameraConstants.PiCamera(), new CameraConstants.TestCamera()));
 
     AutoBuilder.configure(
         this::getPose, // Robot pose supplier
@@ -166,7 +170,17 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void simulationPeriodic() {
-    visionSystem.simulationPeriodic();
+    visionSystem.simulationPeriodic(getPose());
+    var i = 0;
+    for (var reef : FieldConstants.Reef.centerFaces) {
+      i++;
+      field.getObject("Reef " + i).setPose(reef);
+    }
+
+    for (var reef : FieldConstants.Reef.redCenterFaces) {
+      i++;
+      field.getObject("Reef " + i).setPose(reef);
+    }
   }
 
   @Override
@@ -186,20 +200,15 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   private void updatePoseWithVision() {
     var poseOpt = visionSystem.getEstimatedGlobalPose();
     SmartDashboard.putBoolean("AprilTag Seen", poseOpt.isPresent());
-    // only allow multitag values
-    SmartDashboard.putNumber("Distance To Shooter", getDistanceToShooter());
-
-    SmartDashboard.putNumber(
-        "Rotation Difference to Shooter", getRotationDifferenceToShooter().getDegrees());
-
-    SmartDashboard.putNumber(
-        "Arm Angle Required", ExtraFunctions.getAngleFromDistance(getDistanceToShooter()));
+    SmartDashboard.putNumber("AprilTag Confidence", visionSystem.getConfidence());
 
     if (poseOpt.isEmpty()) return;
 
     var pose = poseOpt.get();
-    if (pose.targetsUsed.size() < 2) return; // is multiTag
-
+    // only allow multitag and values close to what we already think we are at values
+    if (visionSystem.getConfidence() < 0.9 && getPose().getX() != 0 && getPose().getY() != 0)
+      return;
+    SmartDashboard.putNumber("AprilTag Allowed Confidences", visionSystem.getConfidence());
     // Do not use the rotation from the vision system in any situation as the data
     // we receive is not reliable.
     // navX rotation is A LOT MORE reliable so we will use that instead.
@@ -208,48 +217,18 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
     swerveOdometry.addVisionMeasurement(poseToUse, pose.timestampSeconds);
   }
 
-  private Optional<Pose3d> getTagPose(int id) {
-    var tag = Vision.fieldLayout.getTagPose(id);
-
-    if (tag.isEmpty()) {
-      DriverStation.reportError("Field Layout Couldn't be loaded", false);
-      return Optional.empty();
+  public Pose2d[] getAllianceCorrectedReefLocations() {
+    var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+    if (alliance == DriverStation.Alliance.Red) {
+      return FieldConstants.Reef.redCenterFaces;
     }
-
-    return tag;
+    return FieldConstants.Reef.centerFaces;
   }
 
-  /**
-   * Gets the distance to the shooter.
-   *
-   * @exception DriverStation.reportError if the field layout couldn't be loaded. and returns 0.
-   * @return returns the distance to the shooter in meters. will return 0 if the field layout
-   *     couldn't be loaded.
-   */
-  public double getDistanceToShooter() {
-    var tag = getTagPose(ExtraFunctions.getShooterAprilTagID());
-    if (tag.isEmpty()) return 0;
+  public Pose2d getNearestReef() {
+    var pose = getPose();
 
-    return tag.get().getTranslation().toTranslation2d().getDistance(getPose().getTranslation())
-        + SmartDashboard.getNumber("Move By", 0);
-  }
-
-  public Rotation2d getRotationDifferenceToShooter() {
-    var tag = getTagPose(ExtraFunctions.getShooterAprilTagID());
-
-    if (tag.isEmpty()) return new Rotation2d();
-
-    Rotation2d robotFontsRotationDifferenceToShooter =
-        tag.get()
-            .getTranslation() // Get the translation of the tag
-            .toTranslation2d()
-            .minus(getPose().getTranslation()) // Subtract the robot's translation
-            .getAngle()
-            .minus(getRotation2d()); // Subtract the robot's rotation
-
-    return robotFontsRotationDifferenceToShooter
-        .rotateBy(Rotation2d.fromDegrees(180)) // Rotate by 180 so the back is 0
-        .times(-1); // Invert the angle, so the back is a positive angle that can be inverted.
+    return pose.nearest(List.of(getAllianceCorrectedReefLocations()));
   }
 
   public Pose2d getPose() {
@@ -308,6 +287,10 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   /** Sets the wheels into an X formation to prevent movement. */
   public Command setX() {
     return this.runOnce(this::setModulesToXFormation);
+  }
+
+  public Command goToNearestReef() {
+    return goToPose(getNearestReef());
   }
 
   public Command goToPose(Pose2d pose) {
