@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.simulationSystems.PhotonSim;
+import frc.robot.subsystems.AlgaeArmEncoderSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -31,6 +33,10 @@ public class RobotContainer {
   private final CoralSubsystem coralSubsystem = new CoralSubsystem();
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
+  private final AlgaeSubsystem algaeSubsystem = new AlgaeSubsystem();
+
+  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private final AlgaeArmEncoderSubsystem algaearmSubsystem = new AlgaeArmEncoderSubsystem();
 
   public RobotContainer() {
     setupNamedCommands();
@@ -71,7 +77,7 @@ public class RobotContainer {
   }
 
   private void configureJoystickBindings() {
-    commandController.a().whileTrue(driveSubsystem.setX());
+    // commandController.a().whileTrue(driveSubsystem.setX());
 
     commandController.rightBumper().whileTrue(coralSubsystem.takeCoral());
 
