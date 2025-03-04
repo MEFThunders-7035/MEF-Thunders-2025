@@ -174,9 +174,6 @@ public final class Constants {
     }
   }
 
-  {
-  }
-
   public static final class ElevatorConstants {
     public static final int kElevatorMotorCanID = 9;
     public static final int kElevatorMotorFollowerCanID = 11;
@@ -204,7 +201,6 @@ public final class Constants {
       public static final double kD = 0.2;
     }
 
-    // TODO: Actually tune with your values
     public static final class ElevatorFeedForwardConstants {
       public static final double kS = 0;
       public static final double kG = 2.2;
