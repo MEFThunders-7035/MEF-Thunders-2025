@@ -76,8 +76,6 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
 
     followerConfig.follow(elevatorMotor, true).idleMode(IdleMode.kBrake);
 
-    elevatorMotorFollower.configure(followerConfig);
-
     final SparkMaxConfig elevatorConfig = new SparkMaxConfig();
     elevatorConfig
         .encoder
@@ -94,6 +92,7 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
     elevatorConfig.inverted(false).idleMode(IdleMode.kBrake);
 
     elevatorMotor.configure(elevatorConfig);
+    elevatorMotorFollower.configure(followerConfig);
   }
 
   public Command set(ElevatorPosition position) {
