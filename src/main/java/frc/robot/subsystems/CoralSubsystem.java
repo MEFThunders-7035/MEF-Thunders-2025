@@ -3,28 +3,21 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CoralIntakeConstants;
 import frc.utils.sim_utils.CANSparkMAXWrapped;
+import frc.utils.sim_utils.ColorSensorV3Wrapped;
 
 public class CoralSubsystem extends SubsystemBase implements AutoCloseable {
-  private final CANSparkMAXWrapped coralMotor;
-  private final Ultrasonic ultrasonicSensor;
+  private final CANSparkMAXWrapped coralMotor =
+      new CANSparkMAXWrapped(CoralIntakeConstants.kIntakeMotorCanID, MotorType.kBrushless);
+  ColorSensorV3Wrapped colorSensor = new ColorSensorV3Wrapped(Port.kMXP);
 
   public CoralSubsystem() {
-    coralMotor =
-        new CANSparkMAXWrapped(CoralIntakeConstants.kIntakeMotorCanID, MotorType.kBrushless);
-
-    ultrasonicSensor =
-        new Ultrasonic(
-            CoralIntakeConstants.kUltrasonicPingChannel,
-            CoralIntakeConstants.kUltrasonicEchoChannel);
-
     configureSparkMAX();
-    setDefaultCommand(runMotorCommand(CoralIntakeConstants.kIdleSpeed));
   }
 
   private void configureSparkMAX() {
@@ -41,22 +34,19 @@ public class CoralSubsystem extends SubsystemBase implements AutoCloseable {
   @Override
   public void close() {
     coralMotor.close();
-    ultrasonicSensor.close();
+    colorSensor.close();
   }
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Ultrasonic Distance", ultrasonicSensor.getRangeMM());
+    SmartDashboard.putNumber("Color Sensor Distance", colorSensor.getProximity());
   }
 
   public boolean hasCoral() {
-    // Will be implemented
-    return ultrasonicSensor.getRangeMM() != 0 // Something is wrong
-        && ultrasonicSensor.getRangeMM() < CoralIntakeConstants.kUltrasonicThreshold;
+    return colorSensor.getProximity() > CoralIntakeConstants.kProximityThreshold;
   }
 
   public Command takeCoral() {
-
     return runMotorCommand(CoralIntakeConstants.kIntakeSpeed).until(this::hasCoral);
   }
 
