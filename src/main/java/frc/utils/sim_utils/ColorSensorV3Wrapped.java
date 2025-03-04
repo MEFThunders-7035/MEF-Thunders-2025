@@ -53,11 +53,13 @@ public class ColorSensorV3Wrapped extends ColorSensorV3 implements AutoCloseable
     rgbd[3] = distance;
   }
 
-  public static void setNoteColor(boolean isNote) {
-    if (isNote) {
-      setRGBD(1000, 300, 0, 1500);
+  public static void setNoteColor(boolean isNote, boolean isWhite) {
+    if (isWhite) {
+      setRGBD(1000, 1000, 1000, 1500); // Beyaz için R=G=B yüksek olmalı
+    } else if (isNote) {
+      setRGBD(1000, 300, 0, 1500); // Önceki nota algılama renkleri
     } else {
-      setRGBD(0, 0, 0, 0);
+      setRGBD(0, 0, 0, 0); // Hiçbir şey algılanmıyor
     }
   }
 
