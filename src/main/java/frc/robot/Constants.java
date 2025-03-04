@@ -192,24 +192,24 @@ public final class Constants {
 
     // TODO: Change these values to the actual heights
     public static final double kElevatorL1Height = 1;
-    public static final double kElevatorL2Height = 2;
-    public static final double kElevatorL3Height = 3;
-    public static final double kElevatorL4Height = 4;
+    public static final double kElevatorL2Height = 3.817;
+    public static final double kElevatorL3Height = 4.5;
+    public static final double kElevatorL4Height = 5;
 
     // to tune these values, SEE:
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html
 
     // TODO: Actually tune with your values
     public static final class ElevatorPIDConstants {
-      public static final double kP = 0;
+      public static final double kP = 0.8;
       public static final double kI = 0;
-      public static final double kD = 0;
+      public static final double kD = 0.2;
     }
 
     // TODO: Actually tune with your values
     public static final class ElevatorFeedForwardConstants {
       public static final double kS = 0;
-      public static final double kG = 1;
+      public static final double kG = 2.2;
       public static final double kV = 0;
     }
   }
