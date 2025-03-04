@@ -133,10 +133,8 @@ public final class Constants {
   }
 
   public static final class CoralIntakeConstants {
-    public static final int kUltrasonicPingChannel = 0;
-    public static final int kUltrasonicEchoChannel = 1;
-
-    public static final int kUltrasonicThreshold = 30; // 3cm -> mm
+    public static final int kProximityThreshold =
+        1800; // Pretty arbitrary value, tune this if needed.
 
     public static final int kIntakeMotorCanID = 300;
     public static final double kIntakeSpeed = 0.8;
@@ -218,6 +216,8 @@ public final class Constants {
 
     public static final int kCageIntakeMotorCanID = 35;
     public static final double kCageIdleSpeed = 0;
+
+    // TODO: One of these are proabably supposed to be negative btw...
     public static final double kCageIntakeSpeed = 0.8;
     public static final double kCageCloseSpeed = 0.6;
   }
