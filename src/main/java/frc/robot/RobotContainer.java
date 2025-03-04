@@ -76,7 +76,7 @@ public class RobotContainer {
   }
 
   private void configureJoystickBindings() {
-    // commandController.a().whileTrue(driveSubsystem.setX());
+    commandController.a().whileTrue(driveSubsystem.setX());
 
     commandController.rightBumper().whileTrue(coralSubsystem.takeCoral());
 
