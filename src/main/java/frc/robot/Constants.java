@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.I2C;
 import java.util.Optional;
 
 public final class Constants {
@@ -132,20 +133,50 @@ public final class Constants {
   }
 
   public static final class CoralIntakeConstants {
-    public static final int kUltrasonicPingChannel = 0;
-    public static final int kUltrasonicEchoChannel = 1;
+    public static final int kProximityThreshold =
+        1800; // Pretty arbitrary value, tune this if needed.
 
-    public static final int kUltrasonicThreshold = 30; // 3cm -> mm
-
-    public static final int kIntakeMotorCanID = 9;
+    public static final int kIntakeMotorCanID = 300;
     public static final double kIntakeSpeed = 0.8;
     public static final double kThrowSpeed = 0.6;
     public static final double kIdleSpeed = 0; // The speed that lets the coral stay in place
+
+    public static final class ColorSensorConstants {
+      public static final I2C.Port kColorSensorPort = I2C.Port.kMXP;
+    }
+  }
+
+  public static final class AlgaeIntakeConstants {
+
+    public static final int kAlgaeIntakeMotorCanID = 110;
+    public static final double kAlgaeIntakeSpeed = 0.8;
+    public static final double kAlgaeIdleSpeed = 0;
+    public static final double kAlgaeThrowSpeed = 0.6;
+  }
+
+  public static final class AlgaeArmConstants {
+
+    public static final class AlgaeArmPIDConstants {
+      public static final double kP = 3; // 3
+      public static final double kI = 0.02; // 0.02
+      public static final double kD = 4; // 4
+      public static final double kFF = 0.0; // 0
+
+      // Feedforward gains
+      // ! TODO: TUNE
+      public static final double kS = 0.0;
+      public static final double kG = 2;
+      public static final double kV = 0.0;
+
+      public static final double kAllowedError = 0.05;
+
+      public static final double AMP_POSITION = 0.5;
+    }
   }
 
   public static final class ElevatorConstants {
-    public static final int kElevatorMotorCanID = 13;
-    public static final int kElevatorMotorFollowerCanID = 16;
+    public static final int kElevatorMotorCanID = 9;
+    public static final int kElevatorMotorFollowerCanID = 11;
 
     public static final double kElevatorTolerance = 0.1; // increase if the command never ends
 
@@ -156,26 +187,43 @@ public final class Constants {
 
     // TODO: Change these values to the actual heights
     public static final double kElevatorL1Height = 1;
-    public static final double kElevatorL2Height = 2;
-    public static final double kElevatorL3Height = 3;
-    public static final double kElevatorL4Height = 4;
+    public static final double kElevatorL2Height = 3.817;
+    public static final double kElevatorL3Height = 4.5;
+    public static final double kElevatorL4Height = 5;
 
     // to tune these values, SEE:
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html
 
     // TODO: Actually tune with your values
     public static final class ElevatorPIDConstants {
-      public static final double kP = 0;
+      public static final double kP = 2;
       public static final double kI = 0;
-      public static final double kD = 0;
+      public static final double kD = 0.2;
     }
 
-    // TODO: Actually tune with your values
     public static final class ElevatorFeedForwardConstants {
       public static final double kS = 0;
-      public static final double kG = 0.5;
+      public static final double kG = 2.2;
       public static final double kV = 0;
     }
+  }
+
+  public static final class CageConstants {
+
+    public static final int kCageIntakeMotorCanID = 35;
+    public static final double kCageIdleSpeed = 0;
+
+    // TODO: One of these are proabably supposed to be negative btw...
+    public static final double kCageIntakeSpeed = 0.8;
+    public static final double kCageCloseSpeed = 0.6;
+  }
+
+  public static final class AlgaeArmConstants2 {
+
+    public static final int kAlgaeIntake2MotorCanID = 111;
+    public static final double kAlgae2IntakeSpeed = 0.8;
+    public static final double kAlgae2IdleSpeed = 0;
+    public static final double kAlgae2ThrowSpeed = 0.6;
   }
 
   public static final class CameraConstants {

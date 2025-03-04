@@ -53,6 +53,10 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
 
     elevatorEncoder = elevatorMotor.getEncoder();
     pidController = elevatorMotor.getClosedLoopController();
+    SmartDashboard.putData("Go To L1", this.set(ElevatorPosition.L1));
+    SmartDashboard.putData("Go To L2", this.set(ElevatorPosition.L2));
+    SmartDashboard.putData("Go To L3", this.set(ElevatorPosition.L3));
+    SmartDashboard.putData("Go To L4", this.set(ElevatorPosition.L4));
   }
 
   @Override
@@ -74,14 +78,13 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
   private void setupSparkMAX() {
     final SparkMaxConfig followerConfig = new SparkMaxConfig();
 
-    followerConfig.follow(elevatorMotor, true).idleMode(IdleMode.kBrake);
-
-    elevatorMotorFollower.configure(followerConfig);
+    followerConfig.follow(elevatorMotor, false).idleMode(IdleMode.kBrake);
 
     final SparkMaxConfig elevatorConfig = new SparkMaxConfig();
     elevatorConfig
         .encoder
         .countsPerRevolution(ElevatorConstants.kElevatorEncoderCPR)
+        .inverted(true)
         .positionConversionFactor(ElevatorConstants.kElevatorEncoderPositionFactor);
 
     elevatorConfig
@@ -94,6 +97,7 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
     elevatorConfig.inverted(false).idleMode(IdleMode.kBrake);
 
     elevatorMotor.configure(elevatorConfig);
+    elevatorMotorFollower.configure(followerConfig);
   }
 
   public Command set(ElevatorPosition position) {

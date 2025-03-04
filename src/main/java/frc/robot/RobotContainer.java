@@ -13,9 +13,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.simulationSystems.PhotonSim;
+import frc.robot.subsystems.AlgaeArmEncoderSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.PhotonCameraSystem;
 import java.util.Map;
@@ -31,6 +34,9 @@ public class RobotContainer {
   private final CoralSubsystem coralSubsystem = new CoralSubsystem();
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
+  private final AlgaeSubsystem algaeSubsystem = new AlgaeSubsystem();
+
+  private final AlgaeArmEncoderSubsystem algaearmSubsystem = new AlgaeArmEncoderSubsystem();
 
   public RobotContainer() {
     setupNamedCommands();
@@ -66,8 +72,7 @@ public class RobotContainer {
   private void setDefaultCommands() {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
     ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.kOff));
-    elevatorSubsystem.setDefaultCommand(
-        elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.IDLE));
+    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.set(ElevatorPosition.IDLE));
   }
 
   private void configureJoystickBindings() {
@@ -77,8 +82,20 @@ public class RobotContainer {
 
     commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
 
-    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
-    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
+    commandController.rightTrigger().whileTrue(algaeSubsystem.takeAlgae());
+
+    commandController.leftTrigger().whileTrue(algaeSubsystem.throwAlgae());
+
+    commandController
+        .povUp()
+        .whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
+    commandController
+        .povDown()
+        .whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
+
+    commandController.x().whileTrue(algaearmSubsystem.setArmToAmp());
+
+    commandController.a().whileTrue(algaearmSubsystem.setArmDirection(true));
 
     // .start is the `start` button on the controller not a `start` function.
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
