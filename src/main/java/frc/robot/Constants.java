@@ -199,7 +199,7 @@ public final class Constants {
 
     // TODO: Actually tune with your values
     public static final class ElevatorPIDConstants {
-      public static final double kP = 0.8;
+      public static final double kP = 2;
       public static final double kI = 0;
       public static final double kD = 0.2;
     }
@@ -228,41 +228,6 @@ public final class Constants {
     public static final double kAlgae2IntakeSpeed = 0.8;
     public static final double kAlgae2IdleSpeed = 0;
     public static final double kAlgae2ThrowSpeed = 0.6;
-  }
-
-  public static final class ElevatorConstants {
-    public static final int kElevatorMotorCanID = 13;
-    public static final int kElevatorMotorFollowerCanID = 16;
-
-    public static final double kElevatorTolerance = 0.1; // increase if the command never ends
-
-    public static final int kElevatorEncoderCPR = 4096; // Through bore encoder
-    public static final double kElevatorEncoderPositionFactor = 1; // Through bore encoder
-
-    public static final double kIdleSpeed = 0; // The speed that lets the elevator stay in place
-
-    // TODO: Change these values to the actual heights
-    public static final double kElevatorL1Height = 1;
-    public static final double kElevatorL2Height = 2;
-    public static final double kElevatorL3Height = 3;
-    public static final double kElevatorL4Height = 4;
-
-    // to tune these values, SEE:
-    // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html
-
-    // TODO: Actually tune with your values
-    public static final class ElevatorPIDConstants {
-      public static final double kP = 0;
-      public static final double kI = 0;
-      public static final double kD = 0;
-    }
-
-    // TODO: Actually tune with your values
-    public static final class ElevatorFeedForwardConstants {
-      public static final double kS = 0;
-      public static final double kG = 0.5;
-      public static final double kV = 0;
-    }
   }
 
   public static final class CameraConstants {
