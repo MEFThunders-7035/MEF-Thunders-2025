@@ -290,7 +290,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   public Command goToNearestReef() {
-    return goToPose(getNearestReef());
+    return defer(() -> goToPose(getNearestReef()));
   }
 
   public Command goToPose(Pose2d pose) {
