@@ -150,7 +150,7 @@ public final class Constants {
     public static final double kElevatorTolerance = 0.1; // increase if the command never ends
 
     public static final int kElevatorEncoderCPR = 4096; // Through bore encoder
-    public static final double kElevatorEncoderPositionFactor = 0; // Through bore encoder
+    public static final double kElevatorEncoderPositionFactor = 1; // Through bore encoder
 
     public static final double kIdleSpeed = 0; // The speed that lets the elevator stay in place
 
