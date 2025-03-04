@@ -20,6 +20,8 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.PhotonCameraSystem;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
+
 import java.util.Map;
 import org.littletonrobotics.urcl.URCL;
 
@@ -71,6 +73,7 @@ public class RobotContainer {
   private void setDefaultCommands() {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
     ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.kOff));
+    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.set(ElevatorPosition.IDLE));
   }
 
   private void configureJoystickBindings() {
@@ -84,13 +87,16 @@ public class RobotContainer {
 
     commandController.leftTrigger().whileTrue(algaeSubsystem.throwAlgae());
 
-    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
-    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
+    commandController
+        .povUp()
+        .whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
+    commandController
+        .povDown()
+        .whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
 
     commandController.x().whileTrue(algaearmSubsystem.setArmToAmp());
 
     commandController.a().whileTrue(algaearmSubsystem.setArmDirection(true));
-
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
   }
 
