@@ -23,7 +23,9 @@ public class CageSubsystem extends SubsystemBase implements AutoCloseable {
   private void configureSparkMAX() {
     var config = new SparkMaxConfig();
 
-    config.smartCurrentLimit(40).inverted(false).idleMode(IdleMode.kBrake);
+    // IF this is not a normal NEO you can put the stallLimit to a higer one
+    // thecnically CIM is rated at 133A but 120 is MORE THAN ENOUGH.
+    config.smartCurrentLimit(120).inverted(false).idleMode(IdleMode.kBrake);
 
     cageMotor.configure(config);
   }
@@ -38,7 +40,6 @@ public class CageSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   public Command closeCage() {
-
     return runMotorCommand(CageConstants.kCageCloseSpeed);
   }
 
