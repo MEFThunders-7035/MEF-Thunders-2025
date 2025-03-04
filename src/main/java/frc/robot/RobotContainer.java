@@ -14,13 +14,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.simulationSystems.PhotonSim;
 import frc.robot.subsystems.AlgaeArmEncoderSubsystem;
-import frc.robot.subsystems.AlgaeSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.PhotonCameraSystem;
+import frc.robot.subsystems.ArmSubsystem.ArmPosition;
+
 import java.util.Map;
 import org.littletonrobotics.urcl.URCL;
 
@@ -33,7 +35,7 @@ public class RobotContainer {
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
   private final CoralSubsystem coralSubsystem = new CoralSubsystem();
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
-  private final AlgaeSubsystem algaeSubsystem = new AlgaeSubsystem();
+  private final ArmSubsystem armSubsystem = new ArmSubsystem();
 
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final AlgaeArmEncoderSubsystem algaearmSubsystem = new AlgaeArmEncoderSubsystem();
@@ -73,6 +75,7 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
     ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.kOff));
     elevatorSubsystem.setDefaultCommand(elevatorSubsystem.set(ElevatorPosition.IDLE));
+    armSubsystem.setDefaultCommand(armSubsystem.set(ArmPosition.IDLE));
   }
 
   private void configureJoystickBindings() {
@@ -82,16 +85,11 @@ public class RobotContainer {
 
     commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
 
-    commandController.rightTrigger().whileTrue(algaeSubsystem.takeAlgae());
-
-    commandController.leftTrigger().whileTrue(algaeSubsystem.throwAlgae());
-
     commandController
         .povUp()
         .whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
-    commandController
-        .povDown()
-        .whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
+
+    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
 
     commandController.x().whileTrue(algaearmSubsystem.setArmToAmp());
 

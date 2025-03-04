@@ -78,7 +78,7 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
   private void setupSparkMAX() {
     final SparkMaxConfig followerConfig = new SparkMaxConfig();
 
-    followerConfig.follow(elevatorMotor, false).idleMode(IdleMode.kBrake);
+    followerConfig.follow(elevatorMotor, false).idleMode(IdleMode.kBrake).smartCurrentLimit(120);
 
     final SparkMaxConfig elevatorConfig = new SparkMaxConfig();
     elevatorConfig
@@ -94,7 +94,10 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
         .d(ElevatorConstants.ElevatorPIDConstants.kD)
         .iMaxAccum(0.1);
 
-    elevatorConfig.inverted(false).idleMode(IdleMode.kBrake);
+    elevatorConfig
+    .inverted(false)
+    .idleMode(IdleMode.kBrake).
+    smartCurrentLimit(120);
 
     elevatorMotor.configure(elevatorConfig);
     elevatorMotorFollower.configure(followerConfig);
