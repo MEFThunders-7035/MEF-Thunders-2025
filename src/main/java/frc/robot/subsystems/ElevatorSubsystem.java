@@ -31,11 +31,17 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
   private ElevatorPosition desiredPosition = ElevatorPosition.IDLE;
 
   public enum ElevatorPosition {
+    INTAKE(-0.5),
     L1(ElevatorConstants.kElevatorL1Height),
     L2(ElevatorConstants.kElevatorL2Height),
     L3(ElevatorConstants.kElevatorL3Height),
     L4(ElevatorConstants.kElevatorL4Height),
+
+    ALGEE_L1(ElevatorConstants.kElevatorAlgeeL1Height),
+    ALGEE_L2(ElevatorConstants.kElevatorAlgeeL2Height),
+
     IDLE(0);
+
 
     private double position;
 
@@ -94,10 +100,7 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
         .d(ElevatorConstants.ElevatorPIDConstants.kD)
         .iMaxAccum(0.1);
 
-    elevatorConfig
-    .inverted(false)
-    .idleMode(IdleMode.kBrake).
-    smartCurrentLimit(120);
+    elevatorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(120);
 
     elevatorMotor.configure(elevatorConfig);
     elevatorMotorFollower.configure(followerConfig);

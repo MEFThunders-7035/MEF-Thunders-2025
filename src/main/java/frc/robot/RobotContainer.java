@@ -10,18 +10,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.PlaceReefCommands;
 import frc.robot.simulationSystems.PhotonSim;
-import frc.robot.subsystems.AlgaeArmEncoderSubsystem;
-import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.CoralSubsystem;
-import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
-import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.PhotonCameraSystem;
+import frc.robot.subsystems.*;
 import frc.robot.subsystems.ArmSubsystem.ArmPosition;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 
 import java.util.Map;
 import org.littletonrobotics.urcl.URCL;
@@ -36,9 +32,7 @@ public class RobotContainer {
   private final CoralSubsystem coralSubsystem = new CoralSubsystem();
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
   private final ArmSubsystem armSubsystem = new ArmSubsystem();
-
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-  private final AlgaeArmEncoderSubsystem algaearmSubsystem = new AlgaeArmEncoderSubsystem();
 
   public RobotContainer() {
     setupNamedCommands();
@@ -62,9 +56,7 @@ public class RobotContainer {
   }
 
   public void simPeriodic() {
-    // add any simulation specific code here.
     PhotonSim.update(driveSubsystem.getPose());
-    // was made for photonSim, but it's not used.
   }
 
   private void setupNamedCommands() {
@@ -74,30 +66,36 @@ public class RobotContainer {
   private void setDefaultCommands() {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
     ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.kOff));
-    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.set(ElevatorPosition.IDLE));
-    armSubsystem.setDefaultCommand(armSubsystem.set(ArmPosition.IDLE));
+    elevatorSubsystem.setDefaultCommand(
+        elevatorSubsystem.set(ElevatorPosition.IDLE));
+    armSubsystem.setDefaultCommand(armSubsystem.set(ArmSubsystem.ArmPosition.IDLE));
   }
 
   private void configureJoystickBindings() {
-    // commandController.a().whileTrue(driveSubsystem.setX());
-
-    commandController.rightBumper().whileTrue(coralSubsystem.takeCoral());
-
-    commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
-
     commandController
-        .povUp()
-        .whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L4));
-
-    commandController.y().whileTrue(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.L2));
-
-    commandController.x().whileTrue(algaearmSubsystem.setArmToAmp());
-
-    commandController.a().whileTrue(algaearmSubsystem.setArmDirection(true));
+        .rightBumper()
+        .whileTrue(
+            coralSubsystem
+                .takeCoral()
+                .alongWith(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.INTAKE)));
+    commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
+    commandController.back().whileTrue(coralSubsystem.moveBackwardForHelp());
+    commandController
+        .y()
+        .whileTrue(PlaceReefCommands.L2(elevatorSubsystem, armSubsystem));
+    commandController
+        .b()
+        .whileTrue(PlaceReefCommands.L3(elevatorSubsystem, armSubsystem));
+    
+    commandController.x().whileTrue(
+      Commands.parallel(
+      armSubsystem.set(ArmPosition.ALGEE),
+      elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)
+    ));
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected().andThen(driveSubsystem.stop());
+    return autoChooser.getSelected().andThen(driveSubsystem.drive(0, 0, 0));
   }
 }

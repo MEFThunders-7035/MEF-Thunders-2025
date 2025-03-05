@@ -136,9 +136,10 @@ public final class Constants {
     public static final int kProximityThreshold =
         1800; // Pretty arbitrary value, tune this if needed.
 
-    public static final int kIntakeMotorCanID = 300;
-    public static final double kIntakeSpeed = 0.8;
+    public static final int kIntakeMotorCanID = 14;
+    public static final double kIntakeSpeed = 0.35;
     public static final double kThrowSpeed = 0.6;
+    public static final double kPushSpeed = 0.2;
     public static final double kIdleSpeed = 0; // The speed that lets the coral stay in place
 
     public static final class ColorSensorConstants {
@@ -177,11 +178,16 @@ public final class Constants {
   public static final class ArmConstants {
     public static final int kArmMotorCanID = 14;
 
-    public static final double kStartingAngle = -0.001; // Change the angle the arm is at
+    public static final double kStartingAngle = -0.8; // Change the angle the arm is at
     public static final double kGrabAngle = 0;
-    public static final double kShootAngle = 0.5;
+    public static final double kShootAngle = 5;
+    public static final double kRaseAngle = 2.5;
 
-    public static final double kArmTolerance = 0.2; // increase if the command never ends
+    public static final double kArmL2Angle = 3.74; // actually correct
+    public static final double kArmL3Angle = 4.6; // actually correct
+
+    public static final double kARmAlgeeL1Angle = 30;
+    public static final double kArmTolerance = 0.1; // increase if the command never ends
 
     public static final int kArmEncoderCPR = 1024; // Through bore encoder
     public static final double kArmEncoderPositionFactor = 1; // Through bore encoder
@@ -189,9 +195,9 @@ public final class Constants {
     public static final double kIdleSpeed = 0; // The speed that lets the arm stay in place
 
     public static final class ArmPIDConstants {
-      public static final double kP = 1.4;
+      public static final double kP = 0.1;
       public static final double kI = 0;
-      public static final double kD = 0.3;
+      public static final double kD = 0.0;
     }
   }
 
@@ -199,7 +205,7 @@ public final class Constants {
     public static final int kElevatorMotorCanID = 9;
     public static final int kElevatorMotorFollowerCanID = 11;
 
-    public static final double kElevatorTolerance = 0.005; // increase if the command never ends
+    public static final double kElevatorTolerance = 0.2; // increase if the command never ends
 
     public static final int kElevatorEncoderCPR = 4096; // Through bore encoder
     public static final double kElevatorEncoderPositionFactor = 1; // Through bore encoder
@@ -208,24 +214,27 @@ public final class Constants {
 
     // TODO: Change these values to the actual heights
     public static final double kElevatorL1Height = 1;
-    public static final double kElevatorL2Height = 3.817;
-    public static final double kElevatorL3Height = 4.5;
-    public static final double kElevatorL4Height = 5;
+    public static final double kElevatorL2Height = 2.401; // actually correct
+    public static final double kElevatorL3Height = 6.57; // actually correct
+    public static final double kElevatorL4Height = 9;
+
+    public static final double kElevatorAlgeeL1Height = 3.8;
+    public static final double kElevatorAlgeeL2Height = 6; // CHANGE
 
     // to tune these values, SEE:
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html
 
     // TODO: Actually tune with your values
     public static final class ElevatorPIDConstants {
-      public static final double kP = 2;
+      public static final double kP = 0.25;
       public static final double kI = 0;
-      public static final double kD = 0.2;
+      public static final double kD = 0.12;
     }
 
     // TODO: Actually tune with your values
     public static final class ElevatorFeedForwardConstants {
       public static final double kS = 0;
-      public static final double kG = 2.2;
+      public static final double kG = 2.15;
       public static final double kV = 0;
     }
   }

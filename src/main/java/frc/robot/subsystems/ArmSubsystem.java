@@ -1,18 +1,16 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ArmConstants.ArmPIDConstants;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.ArmConstants.ArmPIDConstants;
 import frc.utils.sim_utils.CANSparkMAXWrapped;
 
 public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
@@ -20,13 +18,18 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
   private final RelativeEncoder armEncoder;
   private final SparkClosedLoopController pidController;
 
-  private ArmPosition desiredPosition = ArmPosition.IDLE;
+  private double desiredPosition = 0;
 
   public enum ArmPosition {
     START(ArmConstants.kStartingAngle),
     GRAB(ArmConstants.kGrabAngle),
     SHOOT(ArmConstants.kShootAngle),
-    IDLE(0);
+
+    L2(ArmConstants.kArmL2Angle),
+    L3(ArmConstants.kArmL3Angle),
+
+    ALGEE(29),
+    IDLE(-1);
 
     private double position;
 
@@ -38,7 +41,6 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
       return position;
     }
   }
-
 
   public ArmSubsystem() {
     armMotor = new CANSparkMAXWrapped(16, MotorType.kBrushless);
@@ -55,8 +57,7 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
 
   private void setupSparkMax() {
     final SparkMaxConfig armConfig = new SparkMaxConfig();
-    armConfig.encoder
-    .positionConversionFactor(ArmConstants.kArmEncoderPositionFactor);
+    armConfig.encoder.positionConversionFactor(ArmConstants.kArmEncoderPositionFactor);
 
     armConfig
         .closedLoop
@@ -75,20 +76,32 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
     SmartDashboard.putNumber("Arm Encoder", armEncoder.getPosition());
   }
 
+  public double getDesiredPos() {
+    return desiredPosition;
+  }
+
   public boolean atPosition() {
     return atPosition(desiredPosition);
   }
 
-  public boolean atPosition(ArmPosition position) {
-    return Math.abs(armEncoder.getPosition() - position.getPosition()) < ArmConstants.kArmTolerance;
+  public boolean atPosition(double position) {
+    return Math.abs(armEncoder.getPosition() - position) < ArmConstants.kArmTolerance;
   }
 
   public Command set(ArmPosition position) {
-    desiredPosition = position;
+    desiredPosition = position.getPosition();
     return run(() -> setPosition(position)).until(this::atPosition);
   }
 
+  public Command increasePoseBy(double increment) {
+    return run(() -> setPosition(desiredPosition + increment)).until(this::atPosition);
+  }
+
   private void setPosition(ArmPosition position) {
+    if (position == ArmPosition.IDLE) {
+      setPosition(desiredPosition);
+      return;
+    }
     setPosition(position.getPosition());
   }
 
