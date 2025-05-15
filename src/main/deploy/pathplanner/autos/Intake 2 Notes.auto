@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake First"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot To Amp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Second"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot To Amp"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
