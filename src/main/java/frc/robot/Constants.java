@@ -179,7 +179,7 @@ public final class Constants {
     public static final int kArmMotorCanID = 14;
 
     public static final double kStartingAngle = -0.8; // Change the angle the arm is at
-    public static final double kGrabAngle = 0;
+    public static final double kGrabAngle = -0.5;
     public static final double kShootAngle = 5;
     public static final double kRaseAngle = 2.5;
 
@@ -188,7 +188,7 @@ public final class Constants {
     public static final double kArmL4Angle = 10; // actually correct
 
     public static final double kARmAlgeeL1Angle = 30;
-    public static final double kArmTolerance = 0.1; // increase if the command never ends
+    public static final double kArmTolerance = 0.25; // increase if the command never ends
 
     public static final int kArmEncoderCPR = 1024; // Through bore encoder
     public static final double kArmEncoderPositionFactor = 1; // Through bore encoder
@@ -236,7 +236,7 @@ public final class Constants {
     // TODO: Actually tune with your values
     public static final class ElevatorFeedForwardConstants {
       public static final double kS = 0;
-      public static final double kG = 2.15;
+      public static final double kG = 2.15; // tuned value used to be: 2.15
       public static final double kV = 0;
     }
   }

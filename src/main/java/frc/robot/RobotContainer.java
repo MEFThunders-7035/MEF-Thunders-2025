@@ -79,6 +79,7 @@ private final XboxController secondController = secondCommandController.getHID()
         .whileTrue(
             coralSubsystem
                 .takeCoral()
+                .alongWith(armSubsystem.set(ArmPosition.GRAB))
                 .alongWith(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.INTAKE)));
     commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
     commandController.back().whileTrue(coralSubsystem.moveBackwardForHelp());
@@ -104,6 +105,8 @@ private final XboxController secondController = secondCommandController.getHID()
             Commands.parallel(
                 armSubsystem.set(ArmPosition.ALGEE),
                 elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)));
+
+
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
 
 
@@ -113,7 +116,6 @@ private final XboxController secondController = secondCommandController.getHID()
             Commands.parallel(
               armSubsystem.set(ArmPosition.ALGEE),
               elevatorSubsystem.set(ElevatorPosition.ALGEE_L2)));
-    secondCommandController.start().onTrue(driveSubsystem.resetFieldOrientation());
 
     secondCommandController
     .x()
@@ -121,7 +123,7 @@ private final XboxController secondController = secondCommandController.getHID()
         Commands.parallel(
           armSubsystem.set(ArmPosition.ALGEE),
           elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)));
-    secondCommandController.start().onTrue(driveSubsystem.resetFieldOrientation());
+
   }
 
   public Command getAutonomousCommand() {
