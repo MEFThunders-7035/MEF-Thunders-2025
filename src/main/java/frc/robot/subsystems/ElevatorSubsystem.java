@@ -39,7 +39,9 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
 
     ALGEE_L1(ElevatorConstants.kElevatorAlgeeL1Height),
     ALGEE_L2(ElevatorConstants.kElevatorAlgeeL2Height),
-    //ALGEE_H1(ElevatorConstants.kElevatorAlgeeL3Height),
+    // ALGEE_H1(ElevatorConstants.kElevatorAlgeeL3Height),
+
+    ALGEE_AMP(0.5),
 
     IDLE(-0.1);
 
@@ -56,10 +58,11 @@ public class ElevatorSubsystem extends SubsystemBase implements AutoCloseable {
 
   public ElevatorSubsystem() {
     setupSparkMAX();
-    
+
     elevatorEncoder = elevatorMotor.getEncoder();
     pidController = elevatorMotor.getClosedLoopController();
-    //elevatorEncoder.setPosition(-0.1); // Bu satırı ekle // asansörü -0.1 deymiş gibi ayarlıyor idle -0.1 ile farklı.
+    // elevatorEncoder.setPosition(-0.1); // Bu satırı ekle // asansörü -0.1 deymiş gibi ayarlıyor
+    // idle -0.1 ile farklı.
     SmartDashboard.putData("Go To L1", this.set(ElevatorPosition.L1));
     SmartDashboard.putData("Go To L2", this.set(ElevatorPosition.L2));
     SmartDashboard.putData("Go To L3", this.set(ElevatorPosition.L3));

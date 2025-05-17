@@ -29,7 +29,10 @@ public class ArmSubsystem extends SubsystemBase implements AutoCloseable {
     L3(ArmConstants.kArmL3Angle),
     L4(ArmConstants.kArmL4Angle),
 
-    ALGEE(29),
+    ALGEE(25),
+
+    ALGEE_THROW(30),
+    ALGEE_UPPER_THROW(20),
     IDLE(0.9);
 
     private double position;

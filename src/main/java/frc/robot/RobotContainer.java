@@ -25,8 +25,9 @@ public class RobotContainer {
   private final CommandXboxController commandController = new CommandXboxController(0);
   private final XboxController controller = commandController.getHID();
 
-private final CommandXboxController secondCommandController = new CommandXboxController(1); //updated
-private final XboxController secondController = secondCommandController.getHID();// updated
+  private final CommandXboxController secondCommandController =
+      new CommandXboxController(1); // updated
+  private final XboxController secondController = secondCommandController.getHID(); // updated
 
   private final SendableChooser<Command> autoChooser;
 
@@ -89,15 +90,8 @@ private final XboxController secondController = secondCommandController.getHID()
     commandController.povRight().whileTrue(cageSubsystem.openCage());
     commandController.povLeft().whileTrue(cageSubsystem.closeCage());
 
-    secondCommandController
-    .rightBumper()
-    .whileTrue(
-        coralSubsystem
-            .takeCoral()
-            .alongWith(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.INTAKE)));
     secondCommandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
     secondCommandController.back().whileTrue(coralSubsystem.moveBackwardForHelp());
-
 
     commandController
         .x()
@@ -106,24 +100,35 @@ private final XboxController secondController = secondCommandController.getHID()
                 armSubsystem.set(ArmPosition.ALGEE),
                 elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)));
 
-
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
-
 
     secondCommandController
         .a()
         .whileTrue(
             Commands.parallel(
-              armSubsystem.set(ArmPosition.ALGEE),
-              elevatorSubsystem.set(ElevatorPosition.ALGEE_L2)));
+                armSubsystem.set(ArmPosition.ALGEE),
+                elevatorSubsystem.set(ElevatorPosition.ALGEE_L2)));
 
     secondCommandController
-    .x()
-    .whileTrue(
-        Commands.parallel(
-          armSubsystem.set(ArmPosition.ALGEE),
-          elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)));
+        .x()
+        .whileTrue(
+            Commands.parallel(
+                armSubsystem.set(ArmPosition.ALGEE),
+                elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)));
 
+    secondCommandController
+        .rightBumper()
+        .whileTrue(
+            Commands.parallel(
+                armSubsystem.set(ArmPosition.ALGEE_THROW),
+                elevatorSubsystem.set(ElevatorPosition.ALGEE_AMP)));
+
+    secondCommandController
+        .rightTrigger(0.7)
+        .whileTrue(
+            Commands.parallel(
+                armSubsystem.set(ArmPosition.ALGEE_UPPER_THROW),
+                elevatorSubsystem.set(ElevatorPosition.L4)));
   }
 
   public Command getAutonomousCommand() {

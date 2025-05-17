@@ -221,7 +221,8 @@ public final class Constants {
 
     public static final double kElevatorAlgeeL1Height = 4.8;
     public static final double kElevatorAlgeeL2Height = 9; // CHANGE
-    //public static final double kElevatorAlgeeL3Height = 2.2; // CHANGE
+
+    // public static final double kElevatorAlgeeL3Height = 2.2; // CHANGE
 
     // to tune these values, SEE:
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html
