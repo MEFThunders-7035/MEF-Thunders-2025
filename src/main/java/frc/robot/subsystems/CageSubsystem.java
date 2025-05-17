@@ -4,6 +4,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CageConstants;
 import frc.utils.sim_utils.CANSparkMAXWrapped;
@@ -52,7 +53,8 @@ public class CageSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   private Command runMotorCommand(double speed) {
-    return this.runEnd(() -> setMotorSpeed(speed), this::stopMotor);
+    return this.runEnd(() -> setMotorSpeed(speed), this::stopMotor)
+        .alongWith(Commands.print("Running Cage motor at speed: " + speed));
   }
 
   private void stopMotor() {

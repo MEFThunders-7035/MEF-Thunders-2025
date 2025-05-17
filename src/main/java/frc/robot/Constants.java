@@ -185,6 +185,7 @@ public final class Constants {
 
     public static final double kArmL2Angle = 3.74; // actually correct
     public static final double kArmL3Angle = 4.6; // actually correct
+    public static final double kArmL4Angle = 10; // actually correct
 
     public static final double kARmAlgeeL1Angle = 30;
     public static final double kArmTolerance = 0.1; // increase if the command never ends
@@ -214,12 +215,13 @@ public final class Constants {
 
     // TODO: Change these values to the actual heights
     public static final double kElevatorL1Height = 1;
-    public static final double kElevatorL2Height = 2.401; // actually correct
-    public static final double kElevatorL3Height = 6.57; // actually correct
-    public static final double kElevatorL4Height = 9;
+    public static final double kElevatorL2Height = 3.4; // actually correct
+    public static final double kElevatorL3Height = 6.9; // actually correct
+    public static final double kElevatorL4Height = 13;
 
-    public static final double kElevatorAlgeeL1Height = 3.8;
-    public static final double kElevatorAlgeeL2Height = 6; // CHANGE
+    public static final double kElevatorAlgeeL1Height = 4.8;
+    public static final double kElevatorAlgeeL2Height = 9; // CHANGE
+    //public static final double kElevatorAlgeeL3Height = 2.2; // CHANGE
 
     // to tune these values, SEE:
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html
@@ -241,12 +243,12 @@ public final class Constants {
 
   public static final class CageConstants {
 
-    public static final int kCageIntakeMotorCanID = 35;
+    public static final int kCageIntakeMotorCanID = 10;
     public static final double kCageIdleSpeed = 0;
 
     // TODO: One of these are proabably supposed to be negative btw...
     public static final double kCageIntakeSpeed = 0.8;
-    public static final double kCageCloseSpeed = 0.6;
+    public static final double kCageCloseSpeed = -0.8;
   }
 
   public static final class AlgaeArmConstants2 {

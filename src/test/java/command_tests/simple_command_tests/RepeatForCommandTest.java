@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RepeatForCommandTest extends CommandTestBase {
-  // TODO: setup repeatForCommand with multiple command types, and test them respectively.
+  // TODO: setup repeatForCommand with multiple command types, and test them respectively
   private int counter = 0;
 
   @BeforeEach

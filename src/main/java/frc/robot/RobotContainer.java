@@ -18,13 +18,15 @@ import frc.robot.simulationSystems.PhotonSim;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.ArmSubsystem.ArmPosition;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
-
 import java.util.Map;
 import org.littletonrobotics.urcl.URCL;
 
 public class RobotContainer {
   private final CommandXboxController commandController = new CommandXboxController(0);
   private final XboxController controller = commandController.getHID();
+
+private final CommandXboxController secondCommandController = new CommandXboxController(1); //updated
+private final XboxController secondController = secondCommandController.getHID();// updated
 
   private final SendableChooser<Command> autoChooser;
 
@@ -33,6 +35,7 @@ public class RobotContainer {
   private final LEDSubsystem ledSubsystem = new LEDSubsystem();
   private final ArmSubsystem armSubsystem = new ArmSubsystem();
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private final CageSubsystem cageSubsystem = new CageSubsystem();
 
   public RobotContainer() {
     setupNamedCommands();
@@ -66,8 +69,7 @@ public class RobotContainer {
   private void setDefaultCommands() {
     driveSubsystem.setDefaultCommand(DriveCommands.driveWithController(driveSubsystem, controller));
     ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.kOff));
-    elevatorSubsystem.setDefaultCommand(
-        elevatorSubsystem.set(ElevatorPosition.IDLE));
+    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.set(ElevatorPosition.IDLE));
     armSubsystem.setDefaultCommand(armSubsystem.set(ArmSubsystem.ArmPosition.IDLE));
   }
 
@@ -80,19 +82,46 @@ public class RobotContainer {
                 .alongWith(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.INTAKE)));
     commandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
     commandController.back().whileTrue(coralSubsystem.moveBackwardForHelp());
+    commandController.y().whileTrue(PlaceReefCommands.L2(elevatorSubsystem, armSubsystem));
+    commandController.b().whileTrue(PlaceReefCommands.L3(elevatorSubsystem, armSubsystem));
+    commandController.a().whileTrue(PlaceReefCommands.L4(elevatorSubsystem, armSubsystem));
+    commandController.povRight().whileTrue(cageSubsystem.openCage());
+    commandController.povLeft().whileTrue(cageSubsystem.closeCage());
+
+    secondCommandController
+    .rightBumper()
+    .whileTrue(
+        coralSubsystem
+            .takeCoral()
+            .alongWith(elevatorSubsystem.set(ElevatorSubsystem.ElevatorPosition.INTAKE)));
+    secondCommandController.leftBumper().whileTrue(coralSubsystem.throwCoral());
+    secondCommandController.back().whileTrue(coralSubsystem.moveBackwardForHelp());
+
+
     commandController
-        .y()
-        .whileTrue(PlaceReefCommands.L2(elevatorSubsystem, armSubsystem));
-    commandController
-        .b()
-        .whileTrue(PlaceReefCommands.L3(elevatorSubsystem, armSubsystem));
-    
-    commandController.x().whileTrue(
-      Commands.parallel(
-      armSubsystem.set(ArmPosition.ALGEE),
-      elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)
-    ));
+        .x()
+        .whileTrue(
+            Commands.parallel(
+                armSubsystem.set(ArmPosition.ALGEE),
+                elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)));
     commandController.start().onTrue(driveSubsystem.resetFieldOrientation());
+
+
+    secondCommandController
+        .a()
+        .whileTrue(
+            Commands.parallel(
+              armSubsystem.set(ArmPosition.ALGEE),
+              elevatorSubsystem.set(ElevatorPosition.ALGEE_L2)));
+    secondCommandController.start().onTrue(driveSubsystem.resetFieldOrientation());
+
+    secondCommandController
+    .x()
+    .whileTrue(
+        Commands.parallel(
+          armSubsystem.set(ArmPosition.ALGEE),
+          elevatorSubsystem.set(ElevatorPosition.ALGEE_L1)));
+    secondCommandController.start().onTrue(driveSubsystem.resetFieldOrientation());
   }
 
   public Command getAutonomousCommand() {

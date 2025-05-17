@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -75,7 +74,8 @@ public class CoralSubsystem extends SubsystemBase implements AutoCloseable {
 
   private Command runMotorCommand(double speed) {
     desiredSpeed = speed;
-    return this.runEnd(() -> setMotorSpeed(speed), this::stopMotor).alongWith(Commands.print("Running coral motor at speed: "+ speed));
+    return this.runEnd(() -> setMotorSpeed(speed), this::stopMotor)
+        .alongWith(Commands.print("Running coral motor at speed: " + speed));
   }
 
   private void stopMotor() {
